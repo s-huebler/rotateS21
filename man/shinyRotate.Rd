@@ -13,3 +13,6 @@ set or one of your own. Choose which variables to plot and see how an axis rotat
 effects the covariance of the variables. Widgets are provided to allow you to change
 the visual asthetics of the data presentation.
 }
+\examples{
+\dontrun{ shinyRotate()}
+}
