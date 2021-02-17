@@ -7,6 +7,7 @@
 #' the visual asthetics of the data presentation.
 #'
 #' @examples
+#' \dontrun{ shinyRotate()}
 shinyRotate<-function(){
   shiny::runApp(system.file("Interactive", package="rotateS21"),launch.browser = TRUE)
 }
