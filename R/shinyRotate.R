@@ -6,6 +6,10 @@
 #' effects the covariance of the variables. Widgets are provided to allow you to change
 #' the visual asthetics of the data presentation.
 #'
+#' @return
+#'
+#' @export
+#'
 #' @examples
 #' \dontrun{ shinyRotate()}
 shinyRotate<-function(){

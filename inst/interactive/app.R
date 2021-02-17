@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(readxl)
 library(stats)
+library(vroom)
 source("functions.R")
 
 # Built in example dataset
@@ -20,13 +21,27 @@ ui<- fluidPage(
 
       selectInput("data",
                   "Select which dataset to use",
-                  choices = c("four"))
+                  choices = c("four", "Upload"),
+                  selected = '"'),
+
+
+      fileInput("file", NULL, accept = c(".csv", ".XLS", ".xls"))
+
+      # fileInput("file1", "Choose CSV File",
+      #           multiple = FALSE,
+      #           accept = c("text/csv",
+      #                      "text/comma-separated-values,text/plain",
+      #                      ".csv")),
+
+
 
     ),
 
     # Main Panel
     mainPanel(
-      plotOutput("MainPlot"))
+      plotOutput("MainPlot"),
+      tableOutput("test")
+      )
 
   )
 )
@@ -35,18 +50,51 @@ ui<- fluidPage(
 
 server<-function(input, output, session){
 
-  data<-reactive({
+  up<-reactive({
+    req(input$file)
+    ext <- tools::file_ext(input$file$name)
+    switch(ext,
+           csv = read.csv(input$file$datapath),
+           XLS = read_excel(input$file$datapath),
+           xls = read_excel(input$file$datapath),
+           validate("Invalid file; Please upload a .csv or .xls file")
+    )
+  })
+
+  dat<-reactive({
     if(input$data=="four"){
       four
     }else{
-      data.frame("v1"=c(1,2,3), "v2"=c(1,2,3), "v3"=c(1,2,3), "v4"=c(1,2,3))
+      as.data.frame(up())
+      #data.frame("v1"=c(1,2,3), "v2"=c(1,2,3), "v3"=c(1,2,3), "v4"=c(1,2,3))
     }
   })
 
   output$MainPlot<-renderPlot({
-    ggplot(data=data, aes(x=data[,1], y=data[,2]))+
+    df<-dat()
+    ggplot(data=df, aes(x=df[,1], y=df[,2]))+
       geom_point()
   })
+
+
+
+  output$test<-renderTable({
+    head(up(), 5)
+
+    # tryCatch(
+    #   {
+    #     df <- read.csv(input$file$datapath)
+    #   },
+    #   error = function(e) {
+    #     # return a safeError if a parsing error occurs
+    #     stop(safeError(e))
+    #   }
+    # )
+
+
+  })
+
+
 }
 
 # Running the app

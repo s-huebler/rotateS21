@@ -6,6 +6,9 @@
 \usage{
 shinyRotate()
 }
+\value{
+
+}
 \description{
 This function launches a shiny app to interact with a data cloud. Explore the effects
 of different rotations of the axes.You will be able to use the built in sample data
