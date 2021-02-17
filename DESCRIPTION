@@ -1,0 +1,11 @@
+Package: rotateS21
+Type: Package
+Title: Shiny Data Rotation 
+Version: 0.1.0
+Author: Sophie Huebler
+Maintainer: shueber@ou.edu
+Description: Use this package to rotate a data cloud. 
+
+License: MIT+ file LICENSE
+Encoding: UTF-8
+LazyData: true
