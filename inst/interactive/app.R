@@ -19,28 +19,40 @@ ui<- fluidPage(
 
     sidebarPanel(
 
+      #Selecting the type of data (example or uploaded)
       selectInput("data",
                   "Select which dataset to use",
-                  choices = c("four", "Upload"),
+                  choices = c("Example_Four_Measure", "Upload_Your_Own"),
                   selected = '"'),
 
 
-      fileInput("file", NULL, accept = c(".csv", ".XLS", ".xls"))
+      #Reading in the file
+      fileInput("file", NULL, accept = c(".csv", ".XLS", ".xls")),
 
-      # fileInput("file1", "Choose CSV File",
-      #           multiple = FALSE,
-      #           accept = c("text/csv",
-      #                      "text/comma-separated-values,text/plain",
-      #                      ".csv")),
 
+      #Choosing x variable
+      radioButtons("varsX",
+                         "Select x variable ",
+                         choices = c("x1", "x2", "x3", "x4", "dsq")),
+
+      #Choosing y variable
+      radioButtons("varsY",
+                   "Select y variable ",
+                   choices = c("x1", "x2", "x3", "x4", "dsq")),
 
 
     ),
 
+
     # Main Panel
     mainPanel(
-      plotOutput("MainPlot"),
-      tableOutput("test")
+
+      # Rendering data table
+      tableOutput("frame"),
+
+
+      # Main plot
+      plotOutput("MainPlot")
       )
 
   )
@@ -50,6 +62,7 @@ ui<- fluidPage(
 
 server<-function(input, output, session){
 
+  # Reading in the data file based on $file input
   up<-reactive({
     req(input$file)
     ext <- tools::file_ext(input$file$name)
@@ -61,37 +74,74 @@ server<-function(input, output, session){
     )
   })
 
+  # Creating data file based on $data input
   dat<-reactive({
-    if(input$data=="four"){
+    if(input$data=="Example_Four_Measure"){
       four
     }else{
       as.data.frame(up())
-      #data.frame("v1"=c(1,2,3), "v2"=c(1,2,3), "v3"=c(1,2,3), "v4"=c(1,2,3))
     }
   })
 
-  output$MainPlot<-renderPlot({
-    df<-dat()
-    ggplot(data=df, aes(x=df[,1], y=df[,2]))+
-      geom_point()
+  newNames<-reactive({
+    names(dat())
+  })
+
+  #Updating x variable
+  observe({
+
+    temp<-as.vector(newNames())
+    updateRadioButtons(session, "varsX", choices=temp)
+
+  })
+
+  #Updating y variable
+
+  observe({
+
+    temp<-as.vector(newNames())
+    updateRadioButtons(session, "varsY", choices=temp)
+
+  })
+
+
+  horizontal<-reactive({
+    input$varsX
+  })
+
+  vertical<-reactive({
+    input$varsY
   })
 
 
 
-  output$test<-renderTable({
-    head(up(), 5)
 
-    # tryCatch(
-    #   {
-    #     df <- read.csv(input$file$datapath)
-    #   },
-    #   error = function(e) {
-    #     # return a safeError if a parsing error occurs
-    #     stop(safeError(e))
-    #   }
-    # )
+  # Main plot output
+  output$MainPlot<-renderPlot({
+
+    if(input$data=="Upload_Your_Own"){
+      req(input$file)
+    }
 
 
+    df<-dat()
+    h<-horizontal()
+    v<-vertical()
+
+    if(is.element(v, newNames())){
+
+      ggplot(data=df, aes(x=df[,h], y=df[,v]))+
+      geom_point()
+    }else{
+      ggplot(data=NULL)
+    }
+
+  })
+
+
+  # Rendering the data table (delete later)
+  output$frame<-renderTable({
+    head(dat(), 5)
   })
 
 
