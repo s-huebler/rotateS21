@@ -52,7 +52,10 @@ ui<- fluidPage(
 
 
       # Main plot
-      plotOutput("MainPlot")
+      plotOutput("MainPlot", click="plot_click"),
+
+      #Drop 1 correlation
+      verbatimTextOutput("drop")
       )
 
   )
@@ -128,15 +131,29 @@ server<-function(input, output, session){
     h<-horizontal()
     v<-vertical()
 
+
     if(is.element(v, newNames())){
 
       ggplot(data=df, aes(x=df[,h], y=df[,v]))+
-      geom_point()
+      geom_point()+
+      xlab(h)+
+      ylab(v)+
+      ggtitle("Data Cloud")
     }else{
       ggplot(data=NULL)
     }
 
   })
+
+  # Drop one correlation
+  output$drop<-renderPrint({
+    xClick<-input$plot_click$x
+    cat("Drop", "One", "Correlation", "For", "Index", xClick, "Is", xClick)
+
+  })
+
+
+
 
 
   # Rendering the data table (delete later)
