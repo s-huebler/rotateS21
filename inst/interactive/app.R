@@ -3,6 +3,8 @@ library(ggplot2)
 library(readxl)
 library(stats)
 library(vroom)
+library(tidyselect)
+library(tibble)
 source("functions.R")
 
 # Built in example dataset
@@ -138,21 +140,34 @@ server<-function(input, output, session){
       geom_point()+
       xlab(h)+
       ylab(v)+
-      ggtitle("Data Cloud")
+      ggtitle("Data Cloud 1")
     }else{
       ggplot(data=NULL)
     }
 
   })
 
-  # Drop one correlation
+
+#Drop 1 correlations
   output$drop<-renderPrint({
-    xClick<-input$plot_click$x
-    cat("Drop", "One", "Correlation", "For", "Index", xClick, "Is", xClick)
+
+    req(input$plot_click)
+    df<-dat()
+    h<-horizontal()
+    v<-vertical()
+    if(is.element(v, newNames())){
+
+    pointTest<-nearPoints(df, input$plot_click, xvar=input$varsX, yvar=input$varsY)
+    pointTest<-rownames_to_column(pointTest)
+    if(is.numeric(df[1,h])& is.numeric(df[1,v])){
+      values<-dropCor(df, c(h,v))
+      obs<-as.integer(pointTest[1,1])
+      cat("Drop", "One", "Correlation", "For", "Obeservation" , obs, "Is", values[obs])}
+    else{
+      cat("Pick", "Numeric", "Columns")}
+    }
 
   })
-
-
 
 
 
