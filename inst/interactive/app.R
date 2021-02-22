@@ -42,6 +42,11 @@ ui<- fluidPage(
                    "Select y variable ",
                    choices = c("x1", "x2", "x3", "x4", "dsq")),
 
+      #Choosing rotation angle
+      textInput("angle",
+                "Pick an angle (degrees)",
+                value="0")
+
 
     ),
 
@@ -57,7 +62,10 @@ ui<- fluidPage(
       plotOutput("MainPlot", click="plot_click"),
 
       #Drop 1 correlation
-      verbatimTextOutput("drop")
+      verbatimTextOutput("drop"),
+
+      # Rotated plot
+      plotOutput("RotPlot")
       )
 
   )
@@ -168,6 +176,47 @@ server<-function(input, output, session){
     }
 
   })
+
+
+# Rotated Plot
+  output$RotPlot<-renderPlot({
+
+    req(input$angle)
+    if(input$data=="Upload_Your_Own"){
+      req(input$file)
+    }
+
+
+    df<-dat()
+    h<-horizontal()
+    v<-vertical()
+
+    theta<-as.numeric(input$angle)
+
+
+    if(is.element(v, newNames()) & is.numeric(df[1,h])& is.numeric(df[1,v])){
+
+
+      df2<-as.data.frame(myTilde(df[,c(h,v)], theta))
+
+
+      ggplot(data=df2, aes(x=x1t, y=x2t))+
+        geom_point()+
+        xlab(h)+
+        ylab(v)+
+        ggtitle("Data Cloud (Rotated)")
+    }else{
+
+      blank<-data.frame("1"=c(1:10), "2"=c(1:10))
+      ggplot(data=blank, aes(x=1, y=2))+
+         ggtitle("Data Cloud (Rotated")+
+        annotate(geom="text", x=30, y=30, label="Pick Numeric Columns")+
+        theme_void()
+    }
+
+  })
+
+
 
 
 
