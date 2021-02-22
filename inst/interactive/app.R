@@ -153,7 +153,7 @@ server<-function(input, output, session){
       geom_point()+
       xlab(h)+
       ylab(v)+
-      ggtitle("Data Cloud (Original)")
+      ggtitle("Data Cloud")
     }else{
       ggplot(data=NULL)
     }
@@ -205,7 +205,8 @@ server<-function(input, output, session){
       scale<-sqrt(max(abs(df[,h]))**2+ max(abs(df[,v]))**2 )
 
       df2<-myTilde(df[,c(h,v)], theta)
-      s<-round(cov(df2),2)
+      s<-round(cor(df2)[2],5)
+
 
       g1<-ggplot(data=df, aes(x=df[,h], y=df[,v]))+
         geom_point()+
@@ -259,9 +260,10 @@ output$root<-renderPrint({
   }
 
 
-  df<-dat()
-  h<-horizontal()
-  v<-vertical()
+
+df<-dat()
+h<-horizontal()
+v<-vertical()
 
   theta<-as.numeric(input$angle)
   theta<-theta*pi/180
@@ -270,18 +272,17 @@ output$root<-renderPrint({
   if(is.element(v, newNames()) & is.numeric(df[1,h])& is.numeric(df[1,v])){
 
 
-    df2<-myTilde(df[,c(h,v)], theta)
-    cov12<-cov(df2)
+    cov12<-cov(df)[2]
 
-    var11<-var(df[,h])
-    var22<-var(df[,v])
+    var11<-cov(df)[1]
+    var22<-cov(df)[4]
 
     r<-uniroot(f=function(x){
       covTilde(t=x, s11=var11, s22=var22, s12=cov12)},
-      lower=0,
-      upper=pi)$root
+      c(0, pi/2), extendInt = "yes")$root
+    d<-r*180/pi
 
-  #cat(r)
+  cat("The first quadrant solution to Tilde S12=0 is", r, "radians or", d,"degrees")
 
   }
 })
