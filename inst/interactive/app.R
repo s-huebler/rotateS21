@@ -5,6 +5,7 @@ library(stats)
 library(vroom)
 library(tidyselect)
 library(tibble)
+library(ggpubr)
 source("functions.R")
 
 # Built in example dataset
@@ -65,7 +66,11 @@ ui<- fluidPage(
       verbatimTextOutput("drop"),
 
       # Rotated plot
-      plotOutput("RotPlot")
+      plotOutput("RotPlot"),
+
+
+      # Uniroot
+      verbatimTextOutput("root")
       )
 
   )
@@ -192,19 +197,49 @@ server<-function(input, output, session){
     v<-vertical()
 
     theta<-as.numeric(input$angle)
+    theta<-theta*pi/180
 
 
     if(is.element(v, newNames()) & is.numeric(df[1,h])& is.numeric(df[1,v])){
 
+      scale<-sqrt(max(abs(df[,h]))**2+ max(abs(df[,v]))**2 )
 
-      df2<-as.data.frame(myTilde(df[,c(h,v)], theta))
+      df2<-myTilde(df[,c(h,v)], theta)
+      s<-round(cov(df2),2)
 
-
-      ggplot(data=df2, aes(x=x1t, y=x2t))+
+      g1<-ggplot(data=df, aes(x=df[,h], y=df[,v]))+
         geom_point()+
-        xlab(h)+
-        ylab(v)+
-        ggtitle("Data Cloud (Rotated)")
+        xlab("")+
+        ylab("")+
+        ggtitle("Data Cloud (Unrotated)")+
+        xlim(-scale, scale)+
+        ylim(-scale, scale)+
+        geom_hline(yintercept=0, color="red")+
+        geom_vline(xintercept=0, color="blue")+
+        coord_fixed()
+
+
+      g2<-ggplot(data=df2, aes(x=x1t, y=x2t))+
+        geom_point()+
+        xlab("")+
+        ylab("")+
+        xlim(-scale, scale)+
+        ylim(-scale, scale)+
+        coord_fixed()+
+        ggtitle("Data Cloud (Rotated)")+
+        labs(caption=(paste("Sample Correlation:",  s, sep=" ")))+
+        geom_abline(aes(slope=
+                          ifelse(2*theta/pi==round(2*theta/pi) & theta!=pi & theta!=0,
+                                 10000000 ,-tan(theta)), intercept = 0), color="red",lty=2)+
+        geom_abline(aes(slope=
+                          ifelse(theta/pi==round(theta/pi),
+                                 10000000 ,1/tan(theta)), intercept = 0),color="blue" ,lty=2)+
+        geom_hline(yintercept=0, color="black")+
+        geom_vline(xintercept=0, color="black")
+
+      ggarrange(g1,g2)
+
+
     }else{
 
       blank<-data.frame("1"=c(1:10), "2"=c(1:10))
@@ -214,7 +249,42 @@ server<-function(input, output, session){
         theme_void()
     }
 
+
   })
+
+output$root<-renderPrint({
+  req(input$angle)
+  if(input$data=="Upload_Your_Own"){
+    req(input$file)
+  }
+
+
+  df<-dat()
+  h<-horizontal()
+  v<-vertical()
+
+  theta<-as.numeric(input$angle)
+  theta<-theta*pi/180
+
+
+  if(is.element(v, newNames()) & is.numeric(df[1,h])& is.numeric(df[1,v])){
+
+
+    df2<-myTilde(df[,c(h,v)], theta)
+    cov12<-cov(df2)
+
+    var11<-var(df[,h])
+    var22<-var(df[,v])
+
+    r<-uniroot(f=function(x){
+      covTilde(t=x, s11=var11, s22=var22, s12=cov12)},
+      lower=0,
+      upper=pi)$root
+
+  #cat(r)
+
+  }
+})
 
 
 

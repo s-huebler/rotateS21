@@ -13,9 +13,15 @@ dropCor <- function(X, coln = c(1,2)){
 
 
 myTilde<-function(X, theta){
-  theta<-theta*pi/180
+
 
   x1t= cos(theta)*X[,1] + sin(theta)*X[,2]
   x2t= -sin(theta)*X[,1] + cos(theta)*X[,2]
-  list(x1t=x1t,x2t=x2t)
+  data.frame("x1t"=x1t,"x2t"=x2t)
+}
+
+
+covTilde<-  function(t, s11, s22, s12){
+  s<-sin(t)*cos(t)*(s22-s11)+cos(2*t)*s12
+  s
 }
