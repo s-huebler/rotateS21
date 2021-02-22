@@ -140,7 +140,7 @@ server<-function(input, output, session){
       geom_point()+
       xlab(h)+
       ylab(v)+
-      ggtitle("Data Cloud 1")
+      ggtitle("Data Cloud (Original)")
     }else{
       ggplot(data=NULL)
     }
@@ -148,7 +148,7 @@ server<-function(input, output, session){
   })
 
 
-#Drop 1 correlations
+  # Drop 1 correlations
   output$drop<-renderPrint({
 
     req(input$plot_click)
@@ -171,7 +171,7 @@ server<-function(input, output, session){
 
 
 
-  # Rendering the data table (delete later)
+  # Rendering the data table
   output$frame<-renderTable({
     head(dat(), 5)
   })
