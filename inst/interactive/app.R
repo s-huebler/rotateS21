@@ -48,6 +48,10 @@ ui<- fluidPage(
                     label="Show marginal densities?",
                     value=FALSE),
 
+      checkboxInput("outs",
+                    label="Show points with 5 largest Mahalanobis Distances in Red?",
+                    value=FALSE),
+
       #Choosing rotation angle
       textInput("angle",
                 "Pick an angle (degrees)",
@@ -170,9 +174,10 @@ server<-function(input, output, session){
     exM<-paste(
       "Visualize your data cloud here. You can play around with the axes by selecting ",
       "different x or y variables. Would you like to see the the marginal densities for the",
-      "variables you selected? Just check the marginal densities box. You also have the",
-      "option to change the color of outlier points to any color in the outlier color ",
-      "drop down menu. If you click on a point, you'll be able to see what observation",
+      "variables you selected? Just check the marginal densities box. Do you suspect that",
+      "some of the points might be a outliers? You can change the color of the points with",
+      "the 5 largest Mahalanobis distances to red. Note, this will only work if you are plotting",
+      "two different variables. If you click on a point, you'll be able to see what observation",
       "number the point represents as well as the correlation between the two variables",
       "with that observation being dropped.", sep="\n"
     )
@@ -205,6 +210,8 @@ server<-function(input, output, session){
 
 
   # Main plot output
+
+
   output$MainPlot<-renderPlot({
 
     if(input$data=="Upload_Your_Own"){
@@ -217,14 +224,34 @@ server<-function(input, output, session){
     v<-vertical()
 
 
+
+
+
     if(is.element(v, newNames())){
 
-      p<-ggplot(data=df, aes(x=df[,h], y=df[,v]))+
+      if(input$outs==TRUE){
+      if(v!=h ){
+
+      dist<-mahalanobis(df[,c(h,v)], c(mean(df[,h]), mean(df[,v])), cov(df[,c(h,v)]))
+      df<-mutate(df, "Dist"=dist)
+      df<-mutate(df, "Out"=ifelse(is.element(dist,head(dist[order(-dist)], 5)),"yes","no"))
+
+      }else{df<-mutate(df, "Out"=rep("no",nrow(df)))}
+
+        }
+      else{
+        df<-mutate(df, "Out"=rep("no",nrow(df)))
+      }
+
+      p<-ggplot(data=df, aes(x=df[,h], y=df[,v], color=Out))+
       geom_point()+
       xlab(h)+
       ylab(v)+
       ggtitle("Data Cloud")+
-        coord_fixed()
+        coord_fixed()+
+        scale_color_manual(labels=c("yes", "no"),
+                          values=c("black", "red"))+
+        theme(legend.position = "none")
 
       p1<-ggMarginal(p, type="density")
 
