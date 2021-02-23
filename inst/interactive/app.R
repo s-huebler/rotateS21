@@ -224,9 +224,6 @@ server<-function(input, output, session){
     v<-vertical()
 
 
-
-
-
     if(is.element(v, newNames())){
 
       if(input$outs==TRUE){
@@ -415,7 +412,6 @@ v<-vertical()
   output$frame<-renderTable({
     head(dat(), 5)
   })
-
 
 }
 
