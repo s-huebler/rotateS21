@@ -6,6 +6,7 @@ library(vroom)
 library(tidyselect)
 library(tibble)
 library(ggpubr)
+library(ggExtra)
 source("functions.R")
 
 # Built in example dataset
@@ -14,8 +15,7 @@ four<-read.csv("fourmeasure.csv")
 
 # User interface
 ui<- fluidPage(
-  # Title Panel
-  titlePanel("Interactive Data Cloud Rotation"),
+
 
   # Sidebar
   sidebarLayout(
@@ -43,6 +43,11 @@ ui<- fluidPage(
                    "Select y variable ",
                    choices = c("x1", "x2", "x3", "x4", "dsq")),
 
+      #Marginal plots yes or no
+      checkboxInput("marg",
+                    label="Show marginal densities?",
+                    value=FALSE),
+
       #Choosing rotation angle
       textInput("angle",
                 "Pick an angle (degrees)",
@@ -56,21 +61,31 @@ ui<- fluidPage(
     mainPanel(
 
       # Rendering data table
+
+      uiOutput("title"),
+
+      uiOutput("intro"),
+
       tableOutput("frame"),
+
+      uiOutput("mainPlotExplanation"),
 
 
       # Main plot
       plotOutput("MainPlot", click="plot_click"),
 
+
       #Drop 1 correlation
       verbatimTextOutput("drop"),
+
+      uiOutput("rotPlotExplanation"),
 
       # Rotated plot
       plotOutput("RotPlot"),
 
 
       # Uniroot
-      verbatimTextOutput("root")
+      uiOutput("root")
       )
 
   )
@@ -132,6 +147,61 @@ server<-function(input, output, session){
   })
 
 
+  output$title<-renderUI({
+    title<-"Interactive Data Cloud Rotation"
+
+    HTML("<span style='font-size:300%'>",
+         title)
+  })
+
+  output$intro<-renderUI({
+    intro<-paste("Use the side panels to explore your dataset (or use the built in example).",
+    "You can upload any csv or excel file as long as it has at least 2 continuous variables",
+    "and column headers. You have the option to plot categorical variables, but you",
+    "won't be able to use the rotation feature." ,sep="\n")
+
+    HTML("<span style='font-size:100%'>",
+      intro
+    )
+  })
+
+  output$mainPlotExplanation<-renderUI({
+
+    exM<-paste(
+      "Visualize your data cloud here. You can play around with the axes by selecting ",
+      "different x or y variables. Would you like to see the the marginal densities for the",
+      "variables you selected? Just check the marginal densities box. You also have the",
+      "option to change the color of outlier points to any color in the outlier color ",
+      "drop down menu. If you click on a point, you'll be able to see what observation",
+      "number the point represents as well as the correlation between the two variables",
+      "with that observation being dropped.", sep="\n"
+    )
+
+    HTML("<span style='font-size:100%'>",
+         exM
+    )
+  })
+
+
+  output$rotPlotExplanation<-renderUI({
+    exR<-paste(
+      "Here you can see what happens when you rotate you data clockwise. The graph ",
+      "on the left is the original data cloud (there for reference). The graph on ",
+      "the right is where you'll see your cloud rotate. To help keep you oriented,",
+      "the orignal axes will rotate along with the data cloud. Control the angle of",
+      "rotation by inputing an angle on the side panel. Careful, make sure you're in ",
+      "degrees. At the bottom of the graph, you'll find the sample correlation between",
+      "the two new variables. Check the very bottom of the page to see which angle will",
+      "end up making the sample correlation between the rotated points 0. If you copy",
+      "and paste that angle into the input, you'll be able to check for yourself that",
+      "the sample correlation goes to 0.",
+      sep="\n"
+    )
+
+    HTML("<span style='font-size:100%'>",
+         exR
+    )
+  })
 
 
   # Main plot output
@@ -149,11 +219,19 @@ server<-function(input, output, session){
 
     if(is.element(v, newNames())){
 
-      ggplot(data=df, aes(x=df[,h], y=df[,v]))+
+      p<-ggplot(data=df, aes(x=df[,h], y=df[,v]))+
       geom_point()+
       xlab(h)+
       ylab(v)+
-      ggtitle("Data Cloud")
+      ggtitle("Data Cloud")+
+        coord_fixed()
+
+      p1<-ggMarginal(p, type="density")
+
+      if(input$marg==TRUE){
+        p1
+      }else{p}
+
     }else{
       ggplot(data=NULL)
     }
@@ -182,6 +260,10 @@ server<-function(input, output, session){
 
   })
 
+  angle<-reactive({
+    as.numeric(input$angle)
+  })
+
 
 # Rotated Plot
   output$RotPlot<-renderPlot({
@@ -196,7 +278,7 @@ server<-function(input, output, session){
     h<-horizontal()
     v<-vertical()
 
-    theta<-as.numeric(input$angle)
+    theta<-angle()
     theta<-theta*pi/180
 
 
@@ -217,7 +299,10 @@ server<-function(input, output, session){
         ylim(-scale, scale)+
         geom_hline(yintercept=0, color="red")+
         geom_vline(xintercept=0, color="blue")+
-        coord_fixed()
+        coord_fixed()+
+        theme_minimal()+
+        annotate(geom="label", x=scale, y=0, label=h, color="red")+
+        annotate(geom="label", x=0, y=scale, label=v, color="blue")
 
 
       g2<-ggplot(data=df2, aes(x=x1t, y=x2t))+
@@ -236,7 +321,13 @@ server<-function(input, output, session){
                           ifelse(theta/pi==round(theta/pi),
                                  10000000 ,1/tan(theta)), intercept = 0),color="blue" ,lty=2)+
         geom_hline(yintercept=0, color="black")+
-        geom_vline(xintercept=0, color="black")
+        geom_vline(xintercept=0, color="black")+
+        theme_minimal()+
+        annotate(geom="label", x=scale*cos(-theta), y=scale*sin(-theta), label=h, color="red")+
+        annotate(geom="label", x=scale*sin(theta), y=scale*cos(theta), label=v, color="blue")+
+        theme(
+          plot.caption = element_text(hjust=0.5, size=15)
+        )
 
       ggarrange(g1,g2)
 
@@ -253,7 +344,7 @@ server<-function(input, output, session){
 
   })
 
-output$root<-renderPrint({
+output$root<-renderUI({
   req(input$angle)
   if(input$data=="Upload_Your_Own"){
     req(input$file)
@@ -265,26 +356,28 @@ df<-dat()
 h<-horizontal()
 v<-vertical()
 
-  theta<-as.numeric(input$angle)
+  theta<-angle()
   theta<-theta*pi/180
 
 
   if(is.element(v, newNames()) & is.numeric(df[1,h])& is.numeric(df[1,v])){
 
+    df2<-df[,c(h,v)]
+    cov12<-cov(df2)[2]
 
-    cov12<-cov(df)[2]
-
-    var11<-cov(df)[1]
-    var22<-cov(df)[4]
+    var11<-cov(df2)[1]
+    var22<-cov(df2)[4]
 
     r<-uniroot(f=function(x){
       covTilde(t=x, s11=var11, s22=var22, s12=cov12)},
       c(0, pi/2), extendInt = "yes")$root
     d<-r*180/pi
 
-  cat("The first quadrant solution to Tilde S12=0 is", r, "radians or", d,"degrees")
-
-  }
+    HTML("<span style='font-size:150%'>",
+         "The first quadrant solution to",
+         "s&#771 <sub> 12</sub>",
+         "is", r, "radians", "or", d, "degrees")
+    }
 })
 
 
