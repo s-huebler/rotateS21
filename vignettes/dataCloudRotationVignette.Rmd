@@ -1,0 +1,81 @@
+---
+title: "dataCloudRotationVignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dataCloudRotationVignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rotateS21)
+```
+
+
+# Introduction
+The rotateS21 package is a single app package designed to help you visualize a multivariate data set. By calling the shinyRotate() function, you can launch the app and get started. Don't have a data set of your own? That's perfectly fine, the app comes with an example set built in. Once you've pulled the app up, you're ready to explore. Mix and match variables to see their distribution. Find the correlation between variables, and see how individual data points influence the correlation. A single point not changing the correlation enough for your liking? Rotate the whole plot! See if you can create new variables with zero correlation (spoiler alert: you can, and the app will tell you how). RAR.
+
+# User Guide
+There are 2 main panels in the layout. Both are interactive.
+
+## Side Panel
+The side panel allows you to control most of the inputs to the app. The first thing to choose is the data set. The Example_Four_Measure is a data set with five continuous variables to choose from. If you prefer to use your own data set, no problem! Just select Upload_Your_Own from the drop down menu. The app won't render the graphics until you upload your own data. You can use anything with a .csv or .xls extension. 
+
+Once you've settled on your data, you'll be able to choose which variables you want to observe. The app works best if you pick two continuous variables! If you want to visualize categorical variables, you'll be able to plot them on the initial scatter plot, but you won't be able to rotate anything. I recomend avoiding this, because rotating the data is the fun part. You can mix and match the variables as much as you like. You can even plot a variable against itself!
+
+To make your plot a little more interesting (and informative), you have a couple of checkbox options. The first option allows you to plot the marginal densities along the side of the graph. The second checkbox allows you to change the colors of the five datapoints with the five highest mahalanobis distances. Since the mahalanobis distance is a multivariate metric, this option will only work if you are plotting two different continuous variables. 
+
+Finally, the last side panel input is the angle of rotation. Enter the desired angle of rotation (in degrees) and watch your data spin! Positive angles will cause the data to rotate clockwise, and negative angles will cause the data to rotate counter-clockwise.
+
+
+
+## Main Panel
+The first thing in the main panel (besides all the words, who needs words when we have graphs?) is the data frame. The app will default to the example data frame, but as soon as you upload your own data it will render. This way you'll never lose track of which data set you're working with.
+
+The second part of the main panel is the data cloud graph. This is the graph that will produce a scatter plot of your two chosen variables. If you have marginal densities clicked on the side panel, you can check the univariate distribution of your variables. And if you have mahalanobis distance checked, you can view the potential multivariate outliers. This graph is also interactive. If you click on a point, you'll be able to see what observation number it matches too as well as what the correlation between the two variables is with that point removed.
+
+Next you have the rotation plots. The plots are side by side, with the plot on the left showing the unrotated data and the plot on the right showing the data rotated by whatever angle you've chosen in the input. Under the right hand graph, you'll be able to view the correlation between the new variables you've created. You'll also be able to see the original axes that rotate along with your data.
+
+Finally, the app lets you know exactly what angle you would need to rotate the data by such that you are left with two uncorrelated variables. 
+
+## Warnings
+There are a couple of things to be wary of. If you have a data set where your variables are on extremely different scales, see if you can transform them to be on similar orders of magnitude. If the difference in scales is too large, the graphs might not render correctly. 
+
+The mahalanobis distance is calculated with the underlying assumption that the data are multivariate normal, and thus that they form an ellipsoid. If your data have a different distribution, then this information won't be very helpful to you. 
+
+
+
+# Theory
+
+## Mahalanobis Distances
+
+The mahalanobis distance is the distance of each point to the centroid of the data cloud. It is analagous to statistical distance. For a data vector $\bar{X}$ with center vector $\bar{\mu}$ and variance/covariance matrix $\Sigma$, the distance is $D^2=(\bar{X}-\bar{\mu})^T\Sigma^{-1}(\bar{X}-\bar{\mu})$.
+
+## Sample Correlation
+
+The sample correlation is a measure of strength between the relationship of two variables. The value is between -1 and 1, with higher absolute values indicating stronger relationships. When a variable is plotted against itself, the sample correlation is exaclty 1. The app calculates the unbiased sample correlation. For a  data vector $\bar{X}$, the sample correlation is $r_{i,k}=\frac{s_{i,k}}{\sqrt{s_{i,i} }\sqrt{s_{k,k}} }$ for every, $i,k$, where $s_{i,i}^2=\frac1n \sum_{j=1}^n (x_{j,i}-\bar{x_i})^2$ and $s_{i,j}=\frac1n \sum_{j=1}^n (x_{j,i}-\bar{x_i})(x_{j,k}-\bar{x_k})$.
+
+## Data Rotation
+
+For any value of theta, each data point $(x_1,x_2)$ is rotated according to the following formula:
+$$
+\tilde{x_1}=x_1cos(\theta)+x_2sin(\theta) \\
+\tilde{x_2}=-x_1sin(\theta)+x_2cos(\theta)
+$$
+
+ If the relationship between the original two variables is high, then most of the variation in the data set will be described by just one of the rotated variables. That's really helpful when dealing with multivariate data sets with many columns. 
+
+Once all the points are rotated, the correlation between the two variables will change. Sometimes we might want to know how much to rotate by to cause the correlation between the new variables to be zero. In order to figure this out, we need to use the following relationship: 
+
+$$
+\tilde{s_{1,2}}=sin(\theta)cos(\theta)(s_{2,2}-s_{2,2})+cos(2\theta)s_{1,2}
+$$
+
+Solving for the roots of this equation between 0 and 90 degrees lets us know which values of $\theta$ will cause the sample correlation to go down to 0 in the first quadrant. 
