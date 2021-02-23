@@ -368,6 +368,7 @@ server<-function(input, output, session){
 
   })
 
+
 output$root<-renderUI({
   req(input$angle)
   if(input$data=="Upload_Your_Own"){
