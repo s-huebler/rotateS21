@@ -17,6 +17,6 @@ Suggests:
     knitr,
     rmarkdown,
     ggplot2,
-    cars,
+    car,
     stats
 VignetteBuilder: knitr

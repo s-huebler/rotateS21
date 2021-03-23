@@ -9,6 +9,7 @@
 #' @export
 #'
 #' @examples
+#'
 #' data(iris)
 #' iris2<-iris[,c(1,2)]
 #' confEllipse(iris2, c(6, 2.9))
@@ -35,7 +36,7 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
   # Setting up variables
   n <- dim(data)[1]
   xbar <- colMeans(data)
-  S <- cov(data)
+  S <- stats::cov(data)
   invS <- solve(S)
 
 

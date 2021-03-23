@@ -22,6 +22,7 @@ confEllipse(data, vec, alpha = 0.05, formatted = TRUE)
 Bivariate Confidence Ellipse for Multivariate Normal Data
 }
 \examples{
+
 data(iris)
 iris2<-iris[,c(1,2)]
 confEllipse(iris2, c(6, 2.9))
