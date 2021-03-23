@@ -15,5 +15,8 @@ Imports:
   shiny
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    ggplot2,
+    cars,
+    stats
 VignetteBuilder: knitr
