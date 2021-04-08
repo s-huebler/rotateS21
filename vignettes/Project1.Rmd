@@ -1,0 +1,82 @@
+---
+title: "Project 1: Recreation of Example 5.11"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Project1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+options(rmarkdown.html_vignette.check_title = FALSE)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = ">",
+  fig.align = "center"
+)
+```
+
+```{r setup}
+library(rotateS21)
+library(car)
+library(PlaneGeometry)
+library(stats)
+
+```
+
+# The Goal
+
+Automated welding machines are used for the assembly of automobile driveshafts. To make sure that a weld can be considered of good quality, the weld needs to be controlled within specific operating limits on 4 variables. The values of each variable were measured every 5 seconds until 40 observations were collected. The goal is to use this data to assess whether the variables are in control. We want to check using multivariate, bivariate, and univariate tests.
+
+```{r}
+welds <- read.table("../inst/df/T5-9.dat")
+names(welds) <- c("Voltage", "Current", "Feed_Speed", "Gas_Flow")
+head(welds)
+```
+
+
+# Normality 
+
+We want to check the data for normality. The book suggests a log transformation for one of the variables. We can assess normality both before and after the transformation.
+
+## Normality of Original Data
+
+The first way to test for normality is to check univariate normality for all of the variables. This can be done using a shapiro wilks test. For this test the null hypothesis is normality, so a significant p-value indicates deviation from normality. The name of each varaible along with its shapiro test statistic and p-value are printed below.
+
+```{r, echo=FALSE}
+n1 <- apply(welds, 2, FUN=shapiro.test)
+
+
+for(i in 1:4){
+  lab <- names(n1)
+  print( paste( lab[i], n1[[i]]$statistic, n1[[i]]$p.value, sep=" "))
+}
+
+```
+
+We can see that the only p-value which is significant at a level of $\alpha=0.05$ is Gas_Flow. This tells us that this variable in not univariate normal. However, we cannot yet say whether the data is multivariate normal.
+
+Next we can check for bivariate normality. We can visually assess bivariate normality by making an ellipse for each pair of variables. To form the ellipse we turn to the covariance matrix. The length of the major axis is the square root of the first eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector. Similarly, the length of the mainor axis is the square root of the second eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector.
+
+```{r}
+ellipseScatter(welds[,c(1,2)])
+ellipseScatter(welds[,c(1,3)])
+ellipseScatter(welds[,c(1,4)])
+ellipseScatter(welds[,c(2,3)])
+ellipseScatter(welds[,c(2,4)])
+ellipseScatter(welds[,c(3,4)])
+```
+
+The bivariate normality does not seem suspicious for any pairs of variables. 
+
+Finally, we can assess multivariate normality using a chi-square QQ-plot. 
+
+```{r}
+chiPlot(welds)
+```
+
+
+## Normality of Transformed Data
+
+

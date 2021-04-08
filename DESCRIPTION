@@ -18,5 +18,6 @@ Suggests:
     rmarkdown,
     ggplot2,
     car,
-    stats
+    stats,
+    PlaneGeometry
 VignetteBuilder: knitr
