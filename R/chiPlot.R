@@ -19,7 +19,7 @@ chiPlot <- function(df) {
   n <- nrow(df)
   a <- ncol(df)
 
-  s <- cov(df)
+  s <- stats::cov(df)
   sInv <- solve(s)
 
   means <- sapply(df, FUN=function(x){scale(x, center=TRUE, scale=FALSE)})
@@ -31,16 +31,21 @@ chiPlot <- function(df) {
   }
 
   multi<-sort(multi)
+  # chi_plot<-data.frame("j"=seq(1:n), "d2"=multi) %>%
+  #   mutate("q"=stats::qchisq((j-0.5)/n, a))
 
-  chi_plot<-data.frame("j"=seq(1:n), "d2"=multi) %>%
-    mutate("q"=qchisq((j-0.5)/n, a))
+  #chi_plot<-data.frame("j"=seq(1:n), "d2"=multi)
+  temp1 <- seq(1:n)
+  temp2 <- stats::qchisq((temp1-0.5)/n, a)
+  chi_plot <- data.frame("j" <- temp1, "d2" <- multi, "q" <- temp2)
 
-  p <- ggplot(chi_plot, aes(x=q, y=d2))+
-    geom_point()+
-    theme_classic()+
-    xlab("Chi")+
-    ylab("Dist")+
-    ggtitle("Chi-Square Plot for Multivariate Data")
 
-  suppressWarnings(p)
+p <- ggplot2::ggplot(chi_plot, ggplot2::aes(x=q, y=d2))+
+  ggplot2::geom_point()+
+  ggplot2::theme_classic()+
+  ggplot2::xlab("Chi")+
+  ggplot2::ylab("Dist")+
+  ggplot2::ggtitle("Chi-Square Plot for Multivariate Data")
+
+suppressWarnings(p)
 }

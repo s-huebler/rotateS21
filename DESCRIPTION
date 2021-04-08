@@ -19,5 +19,6 @@ Suggests:
     ggplot2,
     car,
     stats,
-    PlaneGeometry
+    PlaneGeometry,
+    dplyr
 VignetteBuilder: knitr

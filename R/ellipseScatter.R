@@ -40,7 +40,7 @@ ellipseScatter <- function(df, chi=.05){
 
   p <- ggplot2::ggplot(as.data.frame(ellpath), ggplot2::aes(x=x, y=y))+
     ggplot2::geom_path(color="red")+
-    ggplot2::geom_point(data=df, aes(x=df[,1], y=df[,2]))+
+    ggplot2::geom_point(data=df, ggplot2::aes(x=df[,1], y=df[,2]))+
     ggplot2::theme_classic()
 
   p

@@ -60,20 +60,20 @@ We can see that the only p-value which is significant at a level of $\alpha=0.05
 Next we can check for bivariate normality. We can visually assess bivariate normality by making an ellipse for each pair of variables. To form the ellipse we turn to the covariance matrix. The length of the major axis is the square root of the first eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector. Similarly, the length of the mainor axis is the square root of the second eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector.
 
 ```{r}
-ellipseScatter(welds[,c(1,2)])
-ellipseScatter(welds[,c(1,3)])
-ellipseScatter(welds[,c(1,4)])
-ellipseScatter(welds[,c(2,3)])
-ellipseScatter(welds[,c(2,4)])
-ellipseScatter(welds[,c(3,4)])
+# ellipseScatter(welds[,c(1,2)])
+# ellipseScatter(welds[,c(1,3)])
+# ellipseScatter(welds[,c(1,4)])
+# ellipseScatter(welds[,c(2,3)])
+# ellipseScatter(welds[,c(2,4)])
+# ellipseScatter(welds[,c(3,4)])
 ```
 
 The bivariate normality does not seem suspicious for any pairs of variables. 
 
-Finally, we can assess multivariate normality using a chi-square QQ-plot. 
+Finally, we can assess multivariate normality using a chi-square QQ-plot. We plot the ordered distance squared values for each observation on the y axis. On the x axis On the x axis we have the chi square quantiles of (j-0.5)/n for each j. The quantiles are calculated with the chi square distribution on p degrees of freedom where p is the number of columns in the data frame. If the data is distributed multivariate normal then we would expect our chi plot to follow a straight line at a 45 degree angle.
 
 ```{r}
-chiPlot(welds)
+#chiPlot(welds)
 ```
 
 
