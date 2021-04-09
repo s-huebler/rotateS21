@@ -1,7 +1,19 @@
-#' Bivariate Confidence Ellipse for Multivariate Normal Data
+#' Bivariate Quality Control Ellipse
 #'
-#' @param data , a data frame
-#' @param vec , a test point
+#' This function has 2 main features. The first feature is the quality control ellipse
+#' chart itself. The chart can be used to visually asses bivariate normality. The
+#' shape and direction of the ellipse gives information about the covariance between
+#' the 2 data columns. Further information about the ellipse can be found by printing
+#' the function. Printing the function as an object will return as a list the eigen
+#' vectors and values of the covariance matrix, the half width of the major and minor
+#' axes, and the ratio of major to minor axis. The second feature is test points. A
+#' vector argument can be supplied to be plotted on the control chart. The point is
+#' plotted in red for easy viewing. The user can easily determine whether the point
+#' being tested falls inside the quality control ellipse.
+#'
+#'
+#' @param data , a 2 column data frame
+#' @param vec , a test point in the form of a 2x1 bector
 #' @param alpha , a confidence level
 #' @param formatted , a logical argument to determine whether the data is formatted correctly
 #'
@@ -14,7 +26,7 @@
 #' iris2<-iris[,c(1,2)]
 #' confEllipse(iris2, c(6, 2.9))
 #'
-confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
+confEllipse<-function(data, vec=NULL, alpha=0.05, formatted=TRUE){
 
   # Check to make sure that data is pre-formatted
   if (formatted == FALSE){
@@ -43,6 +55,7 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
   f <- stats::qf(alpha, 2, (n-2), lower.tail = FALSE)
   fScale <- 2 * (n-1) / (n-2) * f
 
+  if(!is.null(vec)){
   testStat <- n *  ( t(xbar - vec) %*% invS %*% (xbar - vec) )
 
   # Performing test
@@ -51,8 +64,10 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
   }else{
     result = "Reject null: point not within confidence region"
   }
-  print(testStat)
 
+  vector <- as.data.frame(t(vec))
+  print(testStat)
+  }
   # Eigen analysis
   e <- eigen(S)
 
@@ -76,23 +91,23 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
   xbar <- as.matrix(xbar, nrow=2)
 
 
-  inside<-c()
-  for(i in 1:n){
-    point <- t(data[i,])
-    m <- n *  ( t(xbar - point) %*% invS %*% (xbar - point) )
-    if (m <= fScale){
-      inside[i] = "No"
-    }else{
-      inside[i] = "Yes"
-    }
-  }
+  # inside<-c()
+  # for(i in 1:n){
+  #   point <- t(data[i,])
+  #   m <- n *  ( t(xbar - point) %*% invS %*% (xbar - point) )
+  #   if (m <= fScale){
+  #     inside[i] = "No"
+  #   }else{
+  #     inside[i] = "Yes"
+  #   }
+  # }
 
 
-  data$inside <- inside
+  #data$inside <- inside
 
   centroid <- as.data.frame(t(xbar))
 
-  vector <- as.data.frame(t(vec))
+
 
   ellipseDf <- as.data.frame(
     car::dataEllipse(data[,1], data[,2], levels=(1-alpha), draw=FALSE))
@@ -121,9 +136,6 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
     ggplot2::geom_point(data=centroid, ggplot2::aes(x=centroid[,1], y=centroid[,2]),
                         color="blue",
                         size=1)+
-    ggplot2::geom_point(data=vector, ggplot2::aes(x=vector[,1], y=vector[,2]),
-                        color="red",
-                        size=3)+
     ggplot2::geom_segment(x= centroid[,1], xend=centroid[,1],
                           y=0, yend= centroid[,2],
                           lty=2,
@@ -139,14 +151,22 @@ confEllipse<-function(data, vec, alpha=0.05, formatted=TRUE){
     ggplot2::ggtitle("Confidence Ellipse")+
     ggplot2::theme_classic()
 
+  if(!is.null(vec)){
+   plot <- plot +
+     ggplot2::geom_point(data=vector, ggplot2::aes(x=vector[,1], y=vector[,2]),
+                         color="red",
+                         size=1)
+  }
+
 
 
   suppressWarnings(print(plot))
 
 # Return
-  ret = list("Test_Result" = result,
-       "Size_of_Quadratic_Form" = testStat,
-       "Scaled_Quantile" = fScale,
+  ret = list(
+        #"Test_Result" = result,
+       #"Size_of_Quadratic_Form" = testStat,
+       #"Scaled_Quantile" = fScale,
        "First_Eigen_Value" = eVal[1],
        "First_Eigen_Vector" = eVec[,1],
        "Second_Eigen_Value" = eVal[2],
