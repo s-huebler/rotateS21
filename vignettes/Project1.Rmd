@@ -58,7 +58,7 @@ We can see that the only p-value which is significant at a level of $\alpha=0.05
 
 Next we can check for bivariate normality. We can visually assess bivariate normality by making an ellipse for each pair of variables. To form the ellipse we turn to the covariance matrix. The length of the major axis is the square root of the first eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector. Similarly, the length of the mainor axis is the square root of the second eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector.
 
-```{r}
+```{r, fig.width=7}
 gridExtra::grid.arrange(
                           ellipseScatter(welds[,c(1,2)]),
                           ellipseScatter(welds[,c(1,3)]),   
@@ -81,7 +81,7 @@ Notice that this measurement is a scalar because the vector $(\textbf{x}_j-\bar{
 
 On the x axis we have the chi square quantiles of (j-0.5)/n for each j. The quantiles are calculated with the chi square distribution on p degrees of freedom where p is the number of columns in the data frame. If the data is distributed multivariate normal then we would expect our chi plot to follow a straight line at a 45 degree angle.
 
-```{r}
+```{r, fig.width=3}
 chiPlot(welds)
 ```
 
@@ -116,7 +116,7 @@ As we can see, the test statistic and p-values of the 3 unchanged variables were
 
 Again we can look at the bivariate spread as well with the ellipses.
 
-```{r}
+```{r, fig.width=7}
 gridExtra::grid.arrange(
                           ellipseScatter(weldT[,c(1,2)]),
                           ellipseScatter(weldT[,c(1,3)]),   
@@ -131,7 +131,7 @@ gridExtra::grid.arrange(
 The ellipses do not appear much different than they did with the untransformed data. However, log transformations are non linear, so the correlation between the variables has changed. 
 
 Finally, we can assess multivariate normality using the chi qq plot. 
-```{r}
+```{r, fig.width=3}
 chiPlot(weldT)
 ```
 Again the chi qq plot is not visibly significantly different than the untransformed qq plot. This affirms the conclusion that the natural log transformation was not a good choice of transformations. Because the transformation is not useful, the rest of the analysis can be done with either the transformed or untransformed data. 
@@ -151,7 +151,16 @@ $$
 
 We can create this chart for our welder data because the welder data has an inherent time series ordering. Recall that observations were recorded every 5 seconds. The function tsq() will create the $T^2$ plot.
 
-```{r}
+We can choose to look at the 99% or 95% upper control limit on the $T^2$ chart.
+
+99%
+```{r, fig.width=5}
+tsq(weldT, chi=.01)
+```
+Here it appears that all observations are in control. 
+
+95%
+```{r, fig.width=5}
 tsq(weldT)
 ```
 
@@ -168,7 +177,7 @@ weldT[31,]
 Now we can look at all of the quality control ellipses. The quality control ellipses shown below are at 95%. 
 
 
-```{r}
+```{r, fig.width=7}
 gridExtra::grid.arrange(
                           confEllipse(weldT[,c(1,2)], c(21.9, 273), .95),
                           confEllipse(weldT[,c(1,3)], c(21.9, 288.7), .95),   
@@ -194,9 +203,15 @@ $$
 
 The uniControl() function will loop through the columns of a data frame and produce all of the univariate x-bar charts. 
 
-```{r}
+```{r, fig.width=7}
 uniControl(weldT)
 ```
 We can see, as expected, that observation 31 was out of control with respect to the gas flow variable. It was not out of control with respect to any other variable. There are no observations that are out of control with respect to any other variables. We can see one observation that has a very low voltage value. It is not quite at the lower control limit, but it is close. This is likely the point outside the quality control ellipse in the bivariate charts that include voltage.
 
 Overall, what we observe in the the univariate charts aligns with what we observe in the multivariate and univariate control observations. 
+
+# Conclusion
+
+The conclusions that we draw are limited because of the non-normal distribution of the gas-flow variable. The natural log transformation did not sufficiently normalize the individual variable or improve the metrics for multivariate normality. 
+
+Comparing the multivariate and univariate quality control charts shows that it is important to consider both. The multivariate $T^2$ chart at the 99% level suggests that all observations are in control. The univariate charts however show that there was a significant deviation in gas-flow at observation 31. It is important to consider both the individual issues with gas-flow as well as the broader consequences of the lapse of control on the product as a whole. 
