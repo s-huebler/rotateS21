@@ -18,11 +18,10 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(rotateS21)
 library(car)
 library(PlaneGeometry)
 library(stats)
-
+library(rotateS21)
 ```
 
 # The Goal
@@ -60,12 +59,15 @@ We can see that the only p-value which is significant at a level of $\alpha=0.05
 Next we can check for bivariate normality. We can visually assess bivariate normality by making an ellipse for each pair of variables. To form the ellipse we turn to the covariance matrix. The length of the major axis is the square root of the first eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector. Similarly, the length of the mainor axis is the square root of the second eigenvalue of the covariance matrix and the direction is determined by the associated eigenvector.
 
 ```{r}
-ellipseScatter(welds[,c(1,2)])
-ellipseScatter(welds[,c(1,3)])
-ellipseScatter(welds[,c(1,4)])
-ellipseScatter(welds[,c(2,3)])
-ellipseScatter(welds[,c(2,4)])
-ellipseScatter(welds[,c(3,4)])
+gridExtra::grid.arrange(
+                          ellipseScatter(welds[,c(1,2)]),
+                          ellipseScatter(welds[,c(1,3)]),   
+                          ellipseScatter(welds[,c(1,4)]),
+                          ellipseScatter(welds[,c(2,3)]),
+                          ellipseScatter(welds[,c(2,4)]),
+                          ellipseScatter(welds[,c(3,4)]),
+                          nrow=2
+  )
 ```
 
 The bivariate normality does not seem suspicious for any pairs of variables. 
@@ -115,12 +117,15 @@ As we can see, the test statistic and p-values of the 3 unchanged variables were
 Again we can look at the bivariate spread as well with the ellipses.
 
 ```{r}
-ellipseScatter(weldT[,c(1,2)])
-ellipseScatter(weldT[,c(1,3)])
-ellipseScatter(weldT[,c(1,4)])
-ellipseScatter(weldT[,c(2,3)])
-ellipseScatter(weldT[,c(2,4)])
-ellipseScatter(weldT[,c(3,4)])
+gridExtra::grid.arrange(
+                          ellipseScatter(weldT[,c(1,2)]),
+                          ellipseScatter(weldT[,c(1,3)]),   
+                          ellipseScatter(weldT[,c(1,4)]),
+                          ellipseScatter(weldT[,c(2,3)]),
+                          ellipseScatter(weldT[,c(2,4)]),
+                          ellipseScatter(weldT[,c(3,4)]),
+                          nrow=2
+  )
 ```
 
 The ellipses do not appear much different than they did with the untransformed data. However, log transformations are non linear, so the correlation between the variables has changed. 
@@ -140,9 +145,58 @@ $$
 
 This value is found for every observation and then plotted against a time series. Because we are plotting the squared distance, the lower control limit is 0. The upper control limit is the chi square quantile of the desired alpha value. Usually alpha is set at .05 or .01 to get 95% of 99% control limits. 
 
-We can create this chart for our welder data because the welder data has an inherent time series ordering. Recall that observations were recorded every 5 seconds. 
+$$
+UCL = \chi_p^2(\alpha)
+$$
+
+We can create this chart for our welder data because the welder data has an inherent time series ordering. Recall that observations were recorded every 5 seconds. The function tsq() will create the $T^2$ plot.
 
 ```{r}
-#tsq(weldT)
+tsq(weldT)
 ```
 
+Here we can see that the 31st observation is out of the control limit. 
+
+# Quality Control Ellipse 
+
+We might like to see how the 31st observation looks on a bivariate scatter plot of all different pairs of variables. One way that we can do this is with the quality control ellipse function confEllipse(). Calling confEllipse() will show a quality control ellipse based on the confidence level set in the arguments. The function can also plot a specific point to show whether that point is inside the ellipse or not. We can plot the bivariate distribution and see whether observation 31 falls outside any of the quality control ellipses.
+
+First we must see the values of observation 31 that we need to test.
+```{r}
+weldT[31,]
+```
+Now we can look at all of the quality control ellipses. The quality control ellipses shown below are at 95%. 
+
+
+```{r}
+gridExtra::grid.arrange(
+                          confEllipse(weldT[,c(1,2)], c(21.9, 273), .95),
+                          confEllipse(weldT[,c(1,3)], c(21.9, 288.7), .95),   
+                          confEllipse(weldT[,c(1,4)], c(21.9, 4.012), .95),
+                          confEllipse(weldT[,c(2,3)], c(273, 288.7), .95),
+                          confEllipse(weldT[,c(2,4)], c(273, 4.012), .95),
+                          confEllipse(weldT[,c(3,4)], c(288.7, 4.012), .95),
+                          nrow=2
+  )
+```
+We can see that observation 31, the observation in red in each graph, is out of control in all of the quality ellipses that plot gas flow. There is one other observation that is out of control in on the voltage axis at the quality control level of 95%. This point might also indicate a problem.  
+
+# Univariate X-bar Charts
+
+We turn to our final assessment, the univariate x-bar charts. This type of chart is similar to the $T^2$ chart, but it plots only a single variable along a time series. We set the upper and lower control limits at 3 standard deviations away from the mean.
+
+$$
+UCL = \bar{x}+3\sigma
+$$
+$$
+LCL = \bar{x}-3\sigma
+$$
+
+The uniControl() function will loop through the columns of a data frame and produce all of the univariate x-bar charts. 
+
+```{r}
+uniControl(weldT)
+```
+We can see, as expected, that observation 31 was out of control with respect to the gas flow variable. It was not out of control with respect to any other variable. There are no observations that are out of control with respect to any other variables. We can see one observation that has a very low voltage value. It is not quite at the lower control limit, but it is close. This is likely the point outside the quality control ellipse in the bivariate charts that include voltage.
+
+Overall, what we observe in the the univariate charts aligns with what we observe in the multivariate and univariate control observations. 

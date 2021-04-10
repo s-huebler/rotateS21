@@ -2,14 +2,14 @@
 % Please edit documentation in R/confEllipse.R
 \name{confEllipse}
 \alias{confEllipse}
-\title{Bivariate Confidence Ellipse for Multivariate Normal Data}
+\title{Bivariate Quality Control Ellipse}
 \usage{
-confEllipse(data, vec, alpha = 0.05, formatted = TRUE)
+confEllipse(data, vec = NULL, alpha = 0.05, formatted = TRUE)
 }
 \arguments{
-\item{data}{, a data frame}
+\item{data}{, a 2 column data frame}
 
-\item{vec}{, a test point}
+\item{vec}{, a test point in the form of a 2x1 bector}
 
 \item{alpha}{, a confidence level}
 
@@ -19,7 +19,13 @@ confEllipse(data, vec, alpha = 0.05, formatted = TRUE)
 
 }
 \description{
-Bivariate Confidence Ellipse for Multivariate Normal Data
+This function has 2 main features. The first feature is the quality control ellipse
+chart itself. The chart can be used to visually asses bivariate normality. The
+shape and direction of the ellipse gives information about the covariance between
+the 2 data columns. The second feature is test points. A
+vector argument can be supplied to be plotted on the control chart. The point is
+plotted in red for easy viewing. The user can easily determine whether the point
+being tested falls inside the quality control ellipse.
 }
 \examples{
 

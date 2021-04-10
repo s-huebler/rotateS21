@@ -3,10 +3,7 @@
 #' This function has 2 main features. The first feature is the quality control ellipse
 #' chart itself. The chart can be used to visually asses bivariate normality. The
 #' shape and direction of the ellipse gives information about the covariance between
-#' the 2 data columns. Further information about the ellipse can be found by printing
-#' the function. Printing the function as an object will return as a list the eigen
-#' vectors and values of the covariance matrix, the half width of the major and minor
-#' axes, and the ratio of major to minor axis. The second feature is test points. A
+#' the 2 data columns. The second feature is test points. A
 #' vector argument can be supplied to be plotted on the control chart. The point is
 #' plotted in red for easy viewing. The user can easily determine whether the point
 #' being tested falls inside the quality control ellipse.
@@ -66,7 +63,7 @@ confEllipse<-function(data, vec=NULL, alpha=0.05, formatted=TRUE){
   }
 
   vector <- as.data.frame(t(vec))
-  print(testStat)
+  #print(testStat)
   }
   # Eigen analysis
   e <- eigen(S)
@@ -115,14 +112,19 @@ confEllipse<-function(data, vec=NULL, alpha=0.05, formatted=TRUE){
   ellipseDf2 <- as.data.frame(
     car::dataEllipse(data[,1], data[,2], levels=(alpha), draw=FALSE))
 
+  xlimitMin <- min(data[,1]) - 1.75**stats::sd(data[,1])
+  xlimitMax <- max(data[,1]) + 1.75*stats::sd(data[,1])
+  ylimitMin <- min(data[,2]) - 1.75*stats::sd(data[,2])
+  ylimitMax <- max(data[,2]) + 1.75*stats::sd(data[,2])
+
 
   plot<-ggplot2::ggplot(data, ggplot2::aes(x=data[,1], y=data[,2]))+
     #ggplot2::geom_point(ggplot2::aes(color=factor(inside)))+
     ggplot2::geom_point(size=0.5)+
-    ggplot2::xlim(min(ellipseDf[,1]),
-                  max(ellipseDf[,1]))+
-    ggplot2::ylim(min(ellipseDf[,2]),
-                  max(ellipseDf[,2]))+
+    ggplot2::xlim(xlimitMin,
+                  xlimitMax)+
+    ggplot2::ylim(ylimitMin,
+                  ylimitMax)+
     # ggplot2::geom_polygon(data=ellipseDf,
     #                       inherit.aes = FALSE,
     #                       ggplot2::aes(x=ellipseDf[,1], y=ellipseDf[,2]),
@@ -148,7 +150,7 @@ confEllipse<-function(data, vec=NULL, alpha=0.05, formatted=TRUE){
                           size=0.25)+
     ggplot2::xlab(names[1])+
     ggplot2::ylab(names[2])+
-    ggplot2::ggtitle("Confidence Ellipse")+
+    ggplot2::ggtitle("Quality Control Ellipse")+
     ggplot2::theme_classic()
 
   if(!is.null(vec)){
@@ -160,19 +162,21 @@ confEllipse<-function(data, vec=NULL, alpha=0.05, formatted=TRUE){
 
 
 
-  suppressWarnings(print(plot))
+  #suppressWarnings(print(plot))
 
 # Return
-  ret = list(
-        #"Test_Result" = result,
-       #"Size_of_Quadratic_Form" = testStat,
-       #"Scaled_Quantile" = fScale,
-       "First_Eigen_Value" = eVal[1],
-       "First_Eigen_Vector" = eVec[,1],
-       "Second_Eigen_Value" = eVal[2],
-       "Second_Eigen_Vector" = eVec[,2],
-       "Major_Half_Width" =  axMajor,
-       "Minor_Half_Width" = axMinor,
-       "Ratio" = ratio
-       )
+ # ret = list(
+       #  #"Test_Result" = result,
+       # #"Size_of_Quadratic_Form" = testStat,
+       # #"Scaled_Quantile" = fScale,
+       # "First_Eigen_Value" = eVal[1],
+       # "First_Eigen_Vector" = eVec[,1],
+       # "Second_Eigen_Value" = eVal[2],
+       # "Second_Eigen_Vector" = eVec[,2],
+       # "Major_Half_Width" =  axMajor,
+       # "Minor_Half_Width" = axMinor,
+       # "Ratio" = ratio,
+       # plot
+       # )
+    return(plot)
 }
