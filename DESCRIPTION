@@ -23,5 +23,7 @@ Suggests:
     dplyr,
     ggpubr,
     gridExtra,
-    purrr
+    purrr,
+    shinyjs,
+    shiny
 VignetteBuilder: knitr
