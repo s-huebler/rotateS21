@@ -1,0 +1,54 @@
+---
+title: "PCA-Boot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PCA-Boot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dplyr,warn.conflicts = FALSE)
+library(rotateS21)
+```
+
+
+We will go over an example of how the pcabootAG function can be used. The data we will use comes from Applied Multivariate Statistical Analysis (6th edition). It describes the carapace and sex measurements for painted turtles. The carapace is measured by three variables: length, width, and height. We will not be focusing on gender for the purposes of this demonstration, so we will look only at the male data. 
+
+```{r}
+turt1 <-read.table("../inst/df/T6-9.dat")
+head(turt1)
+```
+
+It will be helpful to scale the measurements by log. 
+
+```{r}
+names(turt1) <- c("length", "width", "height", "sex")
+ turt <- filter(turt1, sex  == "male") %>% transmute(lleng = log(length), lwid = log(width), lheight = log(height))
+head(turt)
+```
+
+Now we can call the pcabootAG function. The number of bootstrap iterations we should do to get a good estimate while staying within a reasonable time limit is about 1000. The standard alpha level is 0.05, so we can use that. First we will check the covariance matrix. Since there are 3 variables we should see 3 sets of 3 eigenvalues.
+
+```{r}
+pcabootAG(turt, iter=1000, alpha=0.05, covar=TRUE)
+```
+
+The first thing that prints is a console list of the estimates. We can see the bootstrapped confidence intervals and then the AG confidence intervals for the first eigenvalue. Then underneath we see the eigenvector confidence intervals for each coefficient in each principal component. This repeats for all of the eigenvalues/eigenvectors. 
+
+Next we see a series of plots. The histograms represent the bootstrapped eigenvalues. The confidence intervals are printed in the caption. Next we see a violin plot for each eigenvector. Every component of the eigenvector is shown as its own violin plot. 
+
+Now we can look at the function using a different alpha value and the correlation matrix.
+
+```{r}
+pcabootAG(turt, iter=1000, alpha=0.01, covar=FALSE)
+```
+
+We can see that although the scale of the estimates are different, the distributions are similar. This is especially apparent in the shapes of the violins for the eigenvector violin plots. 

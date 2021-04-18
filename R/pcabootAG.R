@@ -102,6 +102,7 @@ for(i in 1:p){
    z <- stats::qnorm(0.05/2, lower.tail = FALSE)
    agL <- eig$values[i]/(1+z*sqrt(2/n))
    agU <- eig$values[i]/(1-z*sqrt(2/n))
+   print(paste("(1-", alpha, ")%", "AG CI", "lambda", i,":", agL, agU))
    ciAgLams <- list(ciAgLams, list(agL, agU))
 
    # Histogram
