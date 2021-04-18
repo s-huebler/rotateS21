@@ -25,5 +25,8 @@ Suggests:
     gridExtra,
     purrr,
     shinyjs,
-    shiny
+    shiny,
+    FactoMineR,
+    boot,
+    tidyr
 VignetteBuilder: knitr
