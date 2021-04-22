@@ -29,5 +29,5 @@ bonCI <- function(df, m, alpha=0.05){
     #append(ciAgLams, list(agL, agU))
   }
 
-  ciAgLams
+  invisible(ciAgLams)
 }

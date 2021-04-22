@@ -48,7 +48,7 @@ The sample principal components are stored as 'Principal_Component_Matrix' where
 pca$Principal_Component_Matrix
 ```
 
-## Part b
+# Part b
 
 The proportion of the total variance explained by the first three principal components is .8988.
 
@@ -56,7 +56,7 @@ The proportion of the total variance explained by the first three principal comp
 pca$Cummulative_Variance[3]
 ```
 
-## Part c
+# Part c
 
 The simultaneous (1-$\alpha$)% bonferroni confidence intervals for the lambda values of the different principal components are constructed using the formula:
 
@@ -65,4 +65,11 @@ $$
 $$
 This formula is a modification of the Anderson and Girshick confidence interval where the bonferroni confidence interval is applied to the $z$ score to include $z_{\frac{\alpha}{2m}}$ for $m$ number of simultaneous intervals. 
 
+```{r}
+bonCI(stock, 3)
+```
 
+
+# Part d
+
+Given the analysis, the stock-rate-return data can be summarized in 3 dimensions. The first 3 principal components capture almost 90% of the variance in the data, so we end up with a good idea of the spread of the data. However, stocks are generally compared to each other, and performing PCA is not a good way to understand how stocks compare. 
