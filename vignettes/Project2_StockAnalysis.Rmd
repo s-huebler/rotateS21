@@ -1,0 +1,38 @@
+---
+title: "Project2_StockAnalysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Project2_StockAnalysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rotateS21)
+```
+
+# Intro
+
+Stock markets are made up of many different stocks. Trying to analyze all of the stocks at once can turn into a multi-dimensional nightmare. One possible solution is 'reducing' the dimensions of the problem with a PCA. With a PCA one can summarize the data using a series of orthogonal linear combinations that capture most of the variation in the data. We will recreate example 8.10 to go through an analysis of how a PCA can be used for stock market data collected for 5 different stocks over a span of 103 weeks. 
+
+```{r}
+stock <- read.table("../inst/df/T8-4.DAT")
+names(stock) <- c("JP", "Citi", "Wells", "Royal", "Exxon")
+head(stock)
+```
+
+We can use the eigenPCA function to perform most of the analysis.
+
+# Part a
+
+The first thing that we want to do is perform the PCA itself. This is done by finding the covariance matrix and analyzing the eigenvalues and eigenvectors. 
+
+
+
