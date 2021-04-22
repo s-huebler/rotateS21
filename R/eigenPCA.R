@@ -29,7 +29,7 @@ eigenPCA <- function(df){
   eigNames <- c()
   for(i in 1:p){
     prinNames[i] <- paste("Prin.Comp", i)
-    eigNames[i] <- paste("e", i)
+    eigNames[i] <- paste("X", i)
   }
 
   names(pc) <- prinNames
