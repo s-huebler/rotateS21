@@ -13,6 +13,8 @@
 #' @export
 #'
 #' @examples
+#' data <- iris[,1:3]
+#' eigenPCA(data)
 eigenPCA <- function(df){
   vars <- names(df)
 

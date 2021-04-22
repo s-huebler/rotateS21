@@ -30,9 +30,39 @@ head(stock)
 
 We can use the eigenPCA function to perform most of the analysis.
 
+```{r}
+(pca <- eigenPCA(stock))
+```
+
 # Part a
 
-The first thing that we want to do is perform the PCA itself. This is done by finding the covariance matrix and analyzing the eigenvalues and eigenvectors. 
+The first thing that we want to do is perform the PCA itself. This is done by finding the covariance matrix and analyzing the eigenvalues and eigenvectors. This is stored as 'Covariance_Matrix' in the objects returned by eigen PCA.
 
+```{r}
+pca$Covariance_Matrix
+```
+
+The sample principal components are stored as 'Principal_Component_Matrix' where each column is a principal component linear combination and each row is a variable that makes up that linear combination. Each i,j entry is the coefficient for variable i in principal component j. 
+
+```{r}
+pca$Principal_Component_Matrix
+```
+
+## Part b
+
+The proportion of the total variance explained by the first three principal components is .8988.
+
+```{r}
+pca$Cummulative_Variance[3]
+```
+
+## Part c
+
+The simultaneous (1-$\alpha$)% bonferroni confidence intervals for the lambda values of the different principal components are constructed using the formula:
+
+$$
+\frac{\hat{\lambda}_i}{1+z_{\frac{\alpha}{2m}}\sqrt\frac{2}{n}} \leq \lambda_i \leq \frac{\hat{\lambda}_i}{1-z_{\frac{\alpha}{2m}}\sqrt\frac{2}{n}}
+$$
+This formula is a modification of the Anderson and Girshick confidence interval where the bonferroni confidence interval is applied to the $z$ score to include $z_{\frac{\alpha}{2m}}$ for $m$ number of simultaneous intervals. 
 
 
