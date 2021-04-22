@@ -10,6 +10,8 @@ bonCI(df, m, alpha = 0.05)
 \item{df}{, df a data frame}
 
 \item{m}{, m the number of simultaneous intervals}
+
+\item{alpha, }{alpha is the condifendce level for the intervals}
 }
 \value{
 

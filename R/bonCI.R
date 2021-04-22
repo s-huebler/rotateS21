@@ -5,6 +5,7 @@
 #'
 #' @param df , df a data frame
 #' @param m , m the number of simultaneous intervals
+#' @param alpha, alpha is the condifendce level for the intervals
 #'
 #' @return
 #' @export
