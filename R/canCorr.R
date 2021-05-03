@@ -13,8 +13,14 @@
 #' @export
 #'
 #' @examples
+#' data <- read.csv("inst/proj3/covidWrangled.csv")
+#' demographics <- data[,8:14]
+#' severity <- data[,15:18]
+#' canCorrPlot(demographics, severity)
 canCorrPlot <- function(df1, df2, plotType="obs", pair=1){
   ccOut <- cc(df1, df2)
   demLC <- ccOut[["xcoef"]]
   severLC <- ccOut[["ycoef"]]
+
+  print("Hello World")
 }

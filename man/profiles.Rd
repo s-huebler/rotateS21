@@ -25,3 +25,7 @@ This function will create a graph that compares the levels of a single categoric
 categorical response variables. The x axis will be the categorical variable. The y axis will the proportion of each level of the
 predictor variable that displays the response variable.
 }
+\examples{
+data <- read.csv("inst/proj3/covidWrangled.csv")
+profiles(data, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")
+}

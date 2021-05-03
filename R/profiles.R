@@ -14,6 +14,8 @@
 #' @export
 #'
 #' @examples
+#' data <- read.csv("inst/proj3/covidWrangled.csv")
+#' profiles(data, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")
 profiles <- function(df, x, y1, y2, y3){
 
   data <- data.frame("x"=df[,x], "y1"=df[,y1], "y2"=df[,y2], "y3"=df[,y3])
