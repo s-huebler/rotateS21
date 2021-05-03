@@ -46,7 +46,7 @@ profiles <- function(df, x1, y1, y2, y3){
     ggplot2::geom_point(ggplot2::aes(x=x1, y=prop3, color="3"))+
     ggplot2::geom_path(ggplot2::aes(x=x1, y=prop3, group="all", color="3"))+
     ggplot2::theme_classic()+
-    ggplot2::theme(axis.text.x = element_text(vjust=0))+
+    ggplot2::theme(axis.text.x = ggplot2::element_text(vjust=0))+
     ggplot2::ylab("Observed Proportion")
   return(p)
 
