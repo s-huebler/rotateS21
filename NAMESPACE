@@ -2,11 +2,13 @@
 
 export(MVnorm)
 export(bonCI)
+export(canCorrPlot)
 export(chiPlot)
 export(confEllipse)
 export(eigenPCA)
 export(ellipseScatter)
 export(pcabootAG)
+export(profiles)
 export(shinyRotate)
 export(tsq)
 export(uniControl)
