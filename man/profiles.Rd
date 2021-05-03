@@ -4,18 +4,18 @@
 \alias{profiles}
 \title{Visual Profile Analysis}
 \usage{
-profiles(df, x, y1, y2, y3)
+profiles(df, x1, y1, y2, y3)
 }
 \arguments{
 \item{df}{, df, a data frame with at least 4 categorical columns}
 
-\item{x}{, x, name of a column in the data frame to use as the predictor variable}
+\item{x1}{, x, index of a binary (0,1) column in the data frame to use as the predictor variable}
 
-\item{y1}{, y1, name of a binary column in the data frame to use as the first response variable}
+\item{y1}{, y1, index of a binary (0,1) column in the data frame to use as the first response variable}
 
-\item{y2}{, y2, name of a binary column in the data frame to use as the second response variable}
+\item{y2}{, y2, index of a binary (0,1) column in the data frame to use as the second response variable}
 
-\item{y3}{, y3, name of a binary column in the data frame to use as the third response variable}
+\item{y3}{, y3, index of a binary (0,1) column in the data frame to use as the third response variable}
 }
 \value{
 
@@ -26,6 +26,6 @@ categorical response variables. The x axis will be the categorical variable. The
 predictor variable that displays the response variable.
 }
 \examples{
-data <- rotateS21::covidWrangled
-profiles(data, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")
+dataframe <- rotateS21::covidWrangled
+profiles(dataframe, 3, 17, 18, 19)
 }
