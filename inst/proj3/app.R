@@ -274,7 +274,7 @@ server<-function(input, output, session){
   output$Plot1.5.1 <-renderPlot({
 
     x <- x()
-     profiles(covid, x, "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")+
+     rotateS21::profiles(covid, x, "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")+
       ggplot2::scale_color_manual(
         name="Severity Measure",
         values=c("1"="blue", "2"="green", "3"="black"),

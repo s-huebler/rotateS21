@@ -5,24 +5,24 @@
 #' predictor variable that displays the response variable.
 #'
 #' @param df , df, a data frame with at least 4 categorical columns
-#' @param x , x, name of a column in the data frame to use as the predictor variable
-#' @param y1 , y1, name of a binary column in the data frame to use as the first response variable
-#' @param y2 , y2, name of a binary column in the data frame to use as the second response variable
-#' @param y3 , y3, name of a binary column in the data frame to use as the third response variable
+#' @param x1 , x, index of a binary (0,1) column in the data frame to use as the predictor variable
+#' @param y1 , y1, index of a binary (0,1) column in the data frame to use as the first response variable
+#' @param y2 , y2, index of a binary (0,1) column in the data frame to use as the second response variable
+#' @param y3 , y3, index of a binary (0,1) column in the data frame to use as the third response variable
 #'
 #' @return
 #' @export
 #'
 #' @examples
-#' data <- rotateS21::covidWrangled
-#' profiles(data, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")
-profiles <- function(df, x, y1, y2, y3){
+#' dataframe <- rotateS21::covidWrangled
+#' profiles(dataframe, 3, 17, 18, 19)
+profiles <- function(df, x1, y1, y2, y3){
 
-  data <- data.frame("x"=df[,x], "y1"=df[,y1], "y2"=df[,y2], "y3"=df[,y3])
+
+  data <- data.frame("x1"=df[,x1], "y1"=df[,y1], "y2"=df[,y2], "y3"=df[,y3])
+  names(data)<-c("x1", "y1", "y2", "y3")
   proportionDF <- dplyr::summarise(
-    dplyr::group_by(
-      data, x
-    ),
+    dplyr::group_by(data, x1),
     tally1 = sum(y1 ==1),
     tally2 = sum(y2 ==1),
     tally3 = sum(y3 ==1),
@@ -33,14 +33,18 @@ profiles <- function(df, x, y1, y2, y3){
   )
 
 
+  print(head(data))
+  print(proportionDF)
+
+
 
   p <- ggplot2::ggplot(proportionDF)+
-    ggplot2::geom_point(ggplot2::aes(x=x, y=prop1, color="1"))+
-    ggplot2::geom_path(ggplot2::aes(x=x, y=prop1, group="all", color="1"))+
-    ggplot2::geom_point(ggplot2::aes(x=x, y=prop2, color="2"))+
-    ggplot2::geom_path(ggplot2::aes(x=x, y=prop2, group="all", color="2"))+
-    ggplot2::geom_point(ggplot2::aes(x=x, y=prop3, color="3"))+
-    ggplot2::geom_path(ggplot2::aes(x=x, y=prop3, group="all", color="3"))+
+    ggplot2::geom_point(ggplot2::aes(x=x1, y=prop1, color="1"))+
+    ggplot2::geom_path(ggplot2::aes(x=x1, y=prop1, group="all", color="1"))+
+    ggplot2::geom_point(ggplot2::aes(x=x1, y=prop2, color="2"))+
+    ggplot2::geom_path(ggplot2::aes(x=x1, y=prop2, group="all", color="2"))+
+    ggplot2::geom_point(ggplot2::aes(x=x1, y=prop3, color="3"))+
+    ggplot2::geom_path(ggplot2::aes(x=x1, y=prop3, group="all", color="3"))+
     ggplot2::theme_classic()+
     ggplot2::theme(axis.text.x = element_text(vjust=0))+
     ggplot2::ylab("Observed Proportion")

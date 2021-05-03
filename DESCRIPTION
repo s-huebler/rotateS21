@@ -19,7 +19,6 @@ Imports:
   car,
   stats,
   PlaneGeometry,
-  dplyr,
   ggpubr,
   gridExtra,
   purrr,
@@ -28,7 +27,8 @@ Imports:
   FactoMineR,
   boot,
   CCA,
-  RCurl
+  RCurl,
+  tidyr,
+  dplyr,
 Suggests: 
-  tidyr
 VignetteBuilder: knitr
