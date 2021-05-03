@@ -16,6 +16,9 @@
 #' @param covar, covar is a logical arg where TRUE uses covariance and FALSE uses correlation
 #'
 #' @return A list a confidence intervals
+#'
+#' @importFrom graphics hist
+#' @importFrom stats cov cov2cor
 #' @export
 #'
 #' @examples

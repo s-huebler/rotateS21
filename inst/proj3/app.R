@@ -1,7 +1,6 @@
 #App
 
 #Loading the dependencies
-library(shiny)
 library(shinyjs)
 library(dplyr)
 library(stats)
