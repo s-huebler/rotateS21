@@ -6,6 +6,7 @@ library(dplyr)
 library(stats)
 library(ggplot2)
 library(CCA)
+library(RCurl)
 
 # Built in example dataset ----
 
