@@ -24,8 +24,8 @@ arguments and plot one or all of the observations and the variables in the compo
 for any of the different pairs of linear combinations.
 }
 \examples{
-data <- read.csv("inst/proj3/covidWrangled.csv")
-demographics <- data[,8:14]
-severity <- data[,15:18]
-canCorrPlot(demographics, severity)
+data <- rotateS21::covidWrangled
+demographics <- data[,9:15]
+severity <- data[,16:19]
+canCorrPlot(demographics,severity)
 }

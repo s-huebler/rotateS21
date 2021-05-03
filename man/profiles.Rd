@@ -26,6 +26,6 @@ categorical response variables. The x axis will be the categorical variable. The
 predictor variable that displays the response variable.
 }
 \examples{
-data <- read.csv("inst/proj3/covidWrangled.csv")
+data <- rotateS21::covidWrangled
 profiles(data, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")
 }
