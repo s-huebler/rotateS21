@@ -206,7 +206,7 @@ server<-function(input, output, session){
       into the ICU, and whether the outcome of the case was death. Although we might expect everyone who has the outcome of
       death to have been in the ICU and hospitalized and symptomatic, there are some rows within the data frame where this
       is not the case. Since the escalation of the disease is not always linear, some cases escalate straight to the ICU and
-      others from hospitalization straight to death. For this reason, we consider each severity marker as a seperate variable.
+      others from hospitalization straight to death. For this reason, we consider each severity marker as a separate variable.
 
       "
     )
@@ -214,7 +214,7 @@ server<-function(input, output, session){
     exp3 <- paste("The CCA will give us 4 different pairs of linear combinations. Each pair will have a canonical correlation
                   value that will tell us the correlation between the pair. The first pair will maximize correlation, so if
                   there is high correlation between the two data sets we will see it displayed there most prominently. If there
-                  is correlation, then we expect to see a high canonical correlation value between the first pair. Convesely, if
+                  is correlation, then we expect to see a high canonical correlation value between the first pair. Convresely, if
                   there is no correlation, we expect to see a low value. ")
 
     Process <- "Process"

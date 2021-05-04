@@ -1,0 +1,222 @@
+---
+title: "Project3_Covid_Trends"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Project3_Covid_Trends}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(fig.width=8, fig.height=7) 
+```
+
+```{r setup}
+library(rotateS21)
+library(ggplot2)
+library(CCA)
+```
+
+
+
+# The Goal
+
+The corona virus affects people differently. Some people are asymptomatic through the whole infection while others develop symtoms anywhere between 2-14 days. For some, the symptoms are comparable to the common flu. For others, the symptoms are much more severe. We will seek to identify the correlation between demographic factors and markers of symptom severity in different patients. The demographic factors are sex, race, and ethnicity. The markers of symptom severity are whether symptoms are present, whether someone was hospitalized prior to ICU, whether somone was entered into the ICU, and whether the outcome of the case was death. Although we might expect everyone who has the outcome of death to have been in the ICU and hospitalized and symptomatic, there are some rows within the data frame where this is not the case. Since the escalation of the disease is not always linear, some cases escalate straight to the ICU and
+others from hospitalization straight to death. For this reason, we consider each severity marker as a separate variable.
+
+The CCA will give us 4 different pairs of linear combinations. Each pair will have a canonical correlation value that will tell us the correlation between the pair. The first pair will maximize correlation, so if  there is high correlation between the two data sets we will see it displayed there most prominently. If there is correlation, then we expect to see a high canonical correlation value between the first pair. Conversely, if  there is no correlation, we expect to see a low value.
+
+# The Process
+
+We begin with our data. The CDC has been collecting covid patient data from hospitals around the united states. Some information that was collected is shown below. Each of the variables is shown in its raw form as well as its dummy coded form.
+
+```{r}
+covid <- rotateS21::covidWrangled
+head(covid)
+```
+
+For this analysis we split a data set that contains both demographics and symptom severity variables into two sub data sets. We then run a canonical correlation analysis (CCA) on the two. We can observe each factor as well as each observation in CCA component space. Since the data is categorical in both data sets, we will need to dummy code each variable to run the CCA. Two of the variables in the demographic data set are binary, so the base levels will be Female for sex and Hispanic/Latino for ethnicity. The race variable has 6 possible options, so the base level will be American Indian/Alaska Native and there will be five variables added to the linear combination, one each for Asian, Black, Multiple/Other, White, Native Hawaiian//Other Pacific Islander. All of the variables in the symptom severity are binary, so the base levels will be Asymptomatic for symptom status, No for hospitalization, No for ICU, and No for death.
+
+# The Theory
+
+Since all of our variables are binary or categorical, they were dummy coded to allow for linear combinations to be made. The only categorical variable was race, and there are 6 levels, so they were each dummy coded as their own variable. The dummy coding and base levels are described in the section above. That allows us to construct linear combinations $X$ for the demographic set and $Y$ for the severity measurement set made up of each variable. The set $X$ has 7 variables, so a linear combination with coefficients in $\bf{a}$ looks like:
+
+$$
+\bf{a}'\bf{X}=\pmatrix{a_1 & a_2 & a_3 & a_4 & a_5 & a_6 & a_7}\pmatrix{X_1 \\ X_2 \\ X_3 \\ X_4 \\ X_5 \\ X_6 \\ X_7}
+$$
+
+The set $Y$ has 4 variables, so a linear combination with coefficients in $\bf{b}$ looks like:
+
+$$
+\bf{b}'\bf{Y}=\pmatrix{b_1 & b_2 & b_3 & b_4}\pmatrix{Y_1 \\ Y_2 \\ Y_3 \\ Y_4 }
+$$
+
+We know that the Var$(\bf{a}'X)=\bf{a'}\Sigma_X\bf{a}$ and Var$(\bf{b'Y}=\bf{b}'\Sigma_Y\bf{b}$ where $\Sigma_X$ is the covariance of the $X$ dataset and $\Sigma_Y$ is the covariance of the $Y$ data set. We will also designate the covariance between the datasets as $\Sigma_{XY}$
+
+The canonical correlation analysis seeks pairs $\bf{a'X},\bf{b'Y}$ such that the correlation between them is maximized. The correlation is found using the standard correlation formula
+
+$$
+\mathrm{Corr}(\bf{a'X},\bf{b'Y})=\frac{\bf{a'}\Sigma_{XY}\bf{b}}{\sqrt{\bf{a'}\Sigma_X\bf{a}}\sqrt{\bf{b}'\Sigma_Y\bf{b}}}
+$$
+
+The number of pairs will be the same as the number of columns in the smaller of the 2 data sets. This is because each linear combination must be uncorrelated to every other linear combination. In our case, our smaller data set has 4 columns. We could not produce more than 4 uncorrelated linear combinations of the variables. Therefore, we will have only 4 pairs of linear combinations and 4 correlation coefficients.
+
+The coefficients of the linear combinations are found by eigen analysis. Let $e_i$ be the $i$th eigenvector of the covariance matrix for $X$ and $f_i$ be the $i$th eigenvector of the covariance matrix of $Y$.Then we have 
+
+$$
+\bf{a'}_1=e_1'\Sigma_X^{-1/2}
+$$
+and
+
+$$
+\bf{b'}_1=f_1'\Sigma_Y^{-1/2}
+$$
+
+Each observation will have a score in the canonical correlation component space. So for each pair of linear combinations the $X$ combination can be visualized as a horizontal axis and the $Y$ linear combination can be visualized as the vertical axis. Then the observations can be plotted in that component space with x coordinate given by plugging in the observed $X$ values into the $X$ linear combination, and the y coordinates given by plugging the observed $Y$ values into the $Y$ linear combination.
+
+# The Results
+
+First we can look at the profiles of the different case severity measurements based on each demographic variable individually. This will not give us a whole multivariate picture, but it will let us know what types of effects we might expect to see in the multivariate analysis.
+
+```{r}
+profiles(covid, "sex", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")+
+      ggplot2::scale_color_manual(
+        name="Severity Measure",
+        values=c("1"="blue", "2"="green", "3"="black"),
+        labels=c("Hospitalization", "ICU", "Death")
+      )
+```
+
+In the first graph we see that all 3 severity measurements occur in a larger proportion of the male cases than the female cases. 
+
+```{r}
+profiles(covid, "race", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")+
+      ggplot2::scale_color_manual(
+        name="Severity Measure",
+        values=c("1"="blue", "2"="green", "3"="black"),
+        labels=c("Hospitalization", "ICU", "Death")
+      )+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1))
+  
+```
+
+Next we see that people of different races also display differing proportions of hospitalization. The ICU and Death lines look flatter than the hospital lines though. 
+
+```{r}
+profiles(covid, "ethnicity", "hosp_yn_Yes", "icu_yn_Yes", "death_yn_Yes")+
+      ggplot2::scale_color_manual(
+        name="Severity Measure",
+        values=c("1"="blue", "2"="green", "3"="black"),
+        labels=c("Hospitalization", "ICU", "Death")
+      )
+```
+Finally, we see that all 3 severity measurements occur in a larger proportion of the Hispanic/Latino cases than the non-Hispanic/Latino cases. Similarly to race, we see that there is a large difference in hospitalization but a much smaller difference in ICU or Death cases. 
+
+Now that we have an idea of what to expect, we can run a canonical correlation analysis.
+
+```{r}
+covicCCA <- cc(covid[,9:15], covid[,16:19])
+```
+
+We can pull from this the different canonical correlation values. 
+
+The fist pair of linear combinations with canonical correlation value 0.1942 is
+
+$$
+\mathrm{Demographics} \, 1: - 0.501X_1 - 0.810X_2 - 0.929X_3 - 0.329X_4 + 2.329X_5 + 1.771X_6 - 0.721X_7
+$$
+
+$$
+\mathrm{Severity} \, 1: 1.506Y_1 - 2.603Y_2 - 0.909Y_3 + 0.457Y_4
+$$
+
+
+The second pair of linear combinations with canonical correlation value 0.06587 is 
+
+$$
+\mathrm{Demographics} \, 2: 0.955X_1 + 7.013X_2 + 2.040X_3 + 0.816X_4 + 2.425X_5 + 3.439X_6 + 0.524X_7
+$$
+
+$$
+\mathrm{Severity} \, 2: 1.282Y_1 - 1.480Y_2 + 2.501Y_3 + 4.657Y_4
+$$
+
+The third pair of linear combinations with canonical correlation value 0.05337 is
+
+$$
+\mathrm{Demographics} \, 3: 0.135X_1 + 2.294X_2 + 5.634X_3 + 2.745X_4 + 1.265X_5 + 5.327X_6 + 1.969X_7
+$$
+
+$$
+\mathrm{Severity} \, 3: - 5.228Y_1 - 0.234Y_2 - 2.610 Y_3 + 3.027 Y_4
+$$
+
+The fourth pair of linear combinations with canonical correlation value is 0.02613
+
+$$
+\mathrm{Demographics} \, 4: 1.376 * X1 - 3.953 * X2 - 0.748 * X3 - 3.558 * X4 + 0.538 * X5 - 1.728 * X6 - 1.367 * X7
+$$
+
+
+$$
+\mathrm{Severity} \, 4: - 3.248 Y_1 - 1.387 Y_2 + 5.009 Y_3 - 3.039 Y_4
+$$
+
+The extremely low canonical correlation values for each of the pairs tells us that the two data sets are not very correlated. We can visually see this results by plotting the observations in the component space of each of the linear combinations. For the sake of space, we will look only at the first combination component space. We will not lose any significant information as the other linear combinations all have canonical correlation values under 0.07.
+
+First we will look at the different observations in the space.
+
+```{r}
+varlabels <- c("Male", "Asian", "Black", "MultiRace", "NativePI", "White", "Ethnicity",
+                   "Symptomatic", "Hospital", "ICU", "Death")
+```
+
+```{r, message=FALSE}
+canCorrPlot(covid[,9:15], covid[,16:19], pair=1, plotType="obs", labels=varlabels)+
+      ggplot2::scale_color_manual(
+        name="Variable Type",
+        values=c("blue","green"),
+        labels=c("Demographics", "Severity"))+
+      ggplot2::xlab("Demographic Component")+
+      ggplot2::ylab("Severity Component")
+```
+As we can see, the values are evenly dispersed throughout the space.
+
+Next we will look at the different variables from each data set in the space.
+
+```{r, message=FALSE}
+canCorrPlot(covid[,9:15], covid[,16:19], pair=1, plotType="bi", labels=varlabels)+
+      ggplot2::scale_color_manual(
+        name="Variable Type",
+        values=c("blue","green"),
+        labels=c("Demographics", "Severity"))+
+      ggplot2::xlab("Demographic Component")+
+      ggplot2::ylab("Severity Component")
+
+```
+
+
+We see that all of the demographic variables stay close to the horizontal axis while all of the case severity measurement variables stay close to the vertical axis. This reaffirms that there is little correlation between the linear combination.
+
+Finally, for a comprehensive view, we can overlay the 2 plots to make a triplot. 
+
+```{r}
+canCorrPlot(covid[,9:15], covid[,16:19], pair=1, plotType="tri", labels=varlabels)+
+      ggplot2::scale_color_manual(
+        name="Variable Type",
+        values=c("blue","green"),
+        labels=c("Demographics", "Severity"))+
+      ggplot2::xlab("Demographic Component")+
+      ggplot2::ylab("Severity Component")
+```
+
+
+# Conclusion
+
+We can see by the canonical correlation values that the correlation between demographics and severity of case are not highly correlated. In the univariate profile visualizations we can see that each of the individual demographic variables may have some effect on the severity of the case, but the overall canonical correlation analysis shows that these effects are not strong enough to make the overall data sets highly correlated.
+
+Going forward, it would be a good idea to expand the data set. Adding more demographic variables would be a good idea. Age was not added because it is already well established that age plays a large role in the outcome of the disease. One variable that is not as well explored is income. Income might be a good demographic variable to look at because people without health insurance may be less likely to go to the hospital. Location might be another good one because some areas, like New York in the beginning of the pandemic, had very high mortality rates due to the hospitals being overwhelmed. As for the severity variables, days in the hospital and days in the icu might be good variables to add into the analysis. There are many different variables that could be analyzed that might yeild different results, but we can say with a high degree of confidence that for the data set that we had available, the demographic variables and the severity of case variables were not highly correlated
