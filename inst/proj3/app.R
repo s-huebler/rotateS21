@@ -176,7 +176,7 @@ padding = 100) #End fluid page
 server<-function(input, output, session){
 
   covid <- covid
-  dummies <- covid[,9:19]
+  #dummies <- covid[,9:19]
   demographics <- covid[,9:15]
   severity <- covid[,16:19]
 
@@ -233,7 +233,7 @@ server<-function(input, output, session){
     )
 
     HTML("<span style='font-size:200%'>", Goal, "</span>", "<br>",
-         "<span style='font-size:100%'>", exp,  "</span>", "<br>",
+         "<span style='font-size:100%'>", exp,  "</span>", "<br>", "</span>","<br>",
          "<span style='font-size:100%'>", exp3,  "</span>", "<br>",
          "<span style='font-size:200%'>", Process, "</span>", "<br>",
          "<span style='font-size:100%'>", exp2,"</span>", "<br>",
@@ -361,13 +361,14 @@ server<-function(input, output, session){
 
   output$UI3.1 <- renderUI({
 
-    title <- "title"
+    title <- "Observations and Variables in Canonical Correlation Component Space"
 
-    exp <- dim(covid)
-
-    # exp <- paste(
-    #  "exp"
-    # )
+    exp <- paste(
+     "Here you can use obs to see the different observations in the cannonical correlation component space. You can use
+     bi to see a biplot for the variables from each of the 2 different datasets in the correlation component space. You can
+     use tri to see a triplot that overlays the previous 2 graphs. You can also select which component space you want to be in,
+     ie. which pair of linear combinations to view as the axes."
+    )
 
     HTML( "<span style='font-size:150%'>", title, "</span>","<br>" ,
           "<span style='font-size:80%'>", exp)
@@ -386,53 +387,18 @@ compNum <- reactive({
   output$Plot3.1 <- renderPlot({
 
     pType <- pType()
-    compNum <- compNum()
+    compNum <- as.integer(compNum())
 
     varlabels <- c("Male", "Asian", "Black", "MultiRace", "NativePI", "White", "Ethnicity",
                    "Symptomatic", "Hospital", "ICU", "Death")
 
-    rotateS21::canCorrPlot(demographics, severity, pair=compNum, plotType=pType, labels=varlabels)+
+    canCorrPlot(demographics, severity, pair=compNum, plotType=pType, labels=varlabels)+
       ggplot2::scale_color_manual(
         name="Variable Type",
         values=c("blue","green"),
         labels=c("Demographics", "Severity"))+
       ggplot2::xlab("Demographic Component")+
       ggplot2::ylab("Severity Component")
-
-
-    # obsScores <- data.frame("x"=ccaList[["scores"]][["xscores"]][,compNum],
-    #                         "y"=ccaList[["scores"]][["yscores"]][,compNum])
-    # demVarScores <- data.frame("Demographics"=ccaList[["scores"]][["corr.X.xscores"]][,compNum],
-    #                            "Severity"=ccaList[["scores"]][["corr.X.yscores"]][,compNum],
-    #                            "Type"="Dem")
-    # sevVarScores <- data.frame("Demographics"=ccaList[["scores"]][["corr.Y.xscores"]][,compNum],
-    #                            "Severity"=ccaList[["scores"]][["corr.Y.yscores"]][,compNum],
-    #                            "Type"="Sev")
-    # varScores <- dplyr::full_join(demVarScores,sevVarScores)
-    #
-    #
-    # if(pType=="obs"){
-    # p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x, y=y))+
-    #   ggplot2::geom_point()+
-    #   ggplot2::theme_classic()+
-    #   ggplot2::xlab("Demographics")+
-    #   ggplot2::ylab("Severity")
-    #
-    # p}
-    #
-    # if(pType=="bi"){
-    #   p <- ggplot2::ggplot(varScores, ggplot2::aes(x=x, y=y, color=~Type))+
-    #     ggplot2::geom_point()+
-    #     ggplot2::theme_classic()+
-    #     ggplot2::xlab("Demographics")+
-    #     ggplot2::ylab("Severity")
-    #
-    #   p}
-
-      # blank<-data.frame("1"=c(1:10), "2"=c(1:10))
-      # ggplot(data=blank, aes(x=1, y=2))+
-      #   theme_void()+
-      #   ggtitle("P2")
 
 
   })
@@ -453,10 +419,24 @@ compNum <- reactive({
     title <- "Conclusion"
 
     exp <- paste(
-      "We can see by the canonical correlation values that the correlation between demographics and ")
+      "We can see by the canonical correlation values that the correlation between demographics and severity of case are not
+      highly correlated. In the univariate profile visualizations we can see that each of the individual demographic variables may
+      have some effect on the severity of the case, but the overall canonical correlation analysis shows that these effects
+      are not strong enough to make the overall data sets highly correlated.")
+    exp2 <- paste(
+      "Going forward, it would be a good idea to expand the data set. Adding more demographic variables would be a good idea. Age
+      was not added because it is already well established that age plays a large role in the outcome of the disease. One variable
+      that is not as well explored is income. Income might be a good demographic variable to look at because people without health
+      insurance may be less likely to go to the hospital. Location might be another good one because some areas, like New York in
+      the beginning of the pandemic, had very high mortality rates due to the hospitals being overwhelmed. As for the severity
+      variables, days in the hospital and days in the icu might be good variables to add into the analysis. There are many
+      different variables that could be analyzed that might yeild different results, but we can say with a high
+      degree of confidence that for the data set that we had available, the demographic variables and the severity of case
+      variables were not highly correlated."
+    )
 
     HTML( "<span style='font-size:200%'>", title, "</span>","<br>" ,
-          "<span style='font-size:100%'>", exp)
+          "<span style='font-size:100%'>", exp, "</span>","<br>", "</span>","<br>", exp2)
 
   })
 

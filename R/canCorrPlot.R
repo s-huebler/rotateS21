@@ -22,8 +22,8 @@
 canCorrPlot <- function(df1, df2, plotType="obs", pair=1, labels){
 
   ccaList <- CCA::cc(df1,df2)
-  obsScores <- data.frame("x"=ccaList[["scores"]][["xscores"]][,pair],
-                          "y"=ccaList[["scores"]][["yscores"]][,pair])
+  obsScores <- data.frame("x1"=ccaList[["scores"]][["xscores"]][,pair],
+                          "y1"=ccaList[["scores"]][["yscores"]][,pair])
   demVarScores <- data.frame("Demographics"=ccaList[["scores"]][["corr.X.xscores"]][,pair],
                              "Severity"=ccaList[["scores"]][["corr.X.yscores"]][,pair],
                              "Type"="Dem")
@@ -34,7 +34,7 @@ canCorrPlot <- function(df1, df2, plotType="obs", pair=1, labels){
 
 
   if(plotType=="obs"){
-    p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x, y=y))+
+    p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x1, y=y1))+
       ggplot2::geom_point()+
       ggplot2::theme_classic()
 
@@ -51,7 +51,7 @@ canCorrPlot <- function(df1, df2, plotType="obs", pair=1, labels){
   }
 
   if(plotType=="tri"){
-    p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x, y=y), alpha=0.5)+
+    p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x1, y=y1), alpha=0.5)+
       ggplot2::geom_point()+
       ggplot2::geom_segment(data=varScores, ggplot2::aes(x=0, xend=Demographics, y=0, yend=Severity, color=Type),
                             arrow = ggplot2::arrow(length = unit(0.5, "cm")))+
