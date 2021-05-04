@@ -141,15 +141,13 @@ ui<-fluidPage(
     tabPanel( "Plots",
               fluidRow(
                 column(2,class="round",
-                       radioButtons("vars3x",
-                                    "Select x variable ",
-                                    choices = c("x1", "x2", "x3", "x4", "dsq")),
-                       radioButtons("vars3y",
-                                    "Select y variable ",
-                                    choices = c("x1", "x2", "x3", "x4", "dsq")),
-                       textInput("alpha",
-                                 "Pick an alpha value",
-                                 value="0.05")
+                       radioButtons("plotType",
+                                    "Select Type of Plot to View",
+                                    choiceNames = c("Observations", "Variable Biplot", "Triplot"),
+                                    choiceValues=c("obs", "bi", "tri")),
+                       radioButtons("component",
+                                    "Select Component Space ",
+                                    choices = c(1, 2, 3, 4))
 
                 ),
                 column(10,
@@ -183,7 +181,7 @@ server<-function(input, output, session){
   severity <- covid[,16:19]
 
   ccaList <- cc(demographics, severity)
-  obsScores <- data.frame("x"=ccaList[["scores"]][["xscores"]][,1], "y"=ccaList[["scores"]][["yscores"]][,1])
+
 
   #Data Table ----
   output$Dataframe1.1<-renderDataTable({
@@ -260,7 +258,8 @@ server<-function(input, output, session){
     exp <- paste(" We can take a look at how each individual demographic variable affects (or doesn't affect)  3 of the
     severity measures. The graph below shows the demographic variable on the x axis. The y axis is the proportion
     of each level of the demographic variable that demonstrates each of the 3 severity measures being charted. This visualization
-    will be helpful in letting us anticipate general trends, but it won't capture the whole picture.
+    will be helpful in letting us anticipate general trends, but it won't capture the whole picture. For that, we'll need to take
+    a multivariate approach.
                  ")
 
        HTML( "<span style='font-size:150%'>", "Visualize Profiles", "</span>","<br>" ,
@@ -306,7 +305,8 @@ server<-function(input, output, session){
     y3 <- paste("Y3-ICU: 1 Yes, 0 No")
     y4 <- paste("Y4-Death: 1 Yes, 0 No")
 
-    exp1 <- paste("After performing the canonical correlation analysis, we find the following pairs of linear combinations:")
+    exp1 <- paste("After performing the canonical correlation analysis, we find the following pairs of linear combinations, with
+                  canonical correlations of 0.1942, 0.06587, 0.05337, and 0.02613 respectively.")
 
     lc1x <- paste("Demographics 1: - 0.501 * X1 - 0.810 * X2 - 0.929 * X3 - 0.329 * X4 + 2.329 * X5 + 1.771 * X6 - 0.721 * X7")
     lc1y <- paste ("Severity 1: 1.506 * Y1 - 2.603 * Y2 - 0.909 * Y3 + 0.457 * Y4")
@@ -321,7 +321,7 @@ server<-function(input, output, session){
     lc4y <- paste ("Severity 4: - 3.248 * Y1 - 1.387 * Y2 + 5.009 * Y3 - 3.039 * Y4")
 
 
-      HTML(  "<span style='font-size:150%'>", "CCA Results", "</span>","<br>", "<span style='font-size:100%'>",
+      HTML(  "<span style='font-size:150%'>", "CCA Results", "</span>","<br>", "<span style='font-size:80%'>",
              varsX,  "</span>","<br>", x1, "</span>","<br>", x2, "</span>","<br>", x3, "</span>","<br>", x4, "</span>","<br>",
            x5, "</span>","<br>", x6, "</span>","<br>", x7 , "</span>","<br>", "</span>","<br>",varsY, "</span>","<br>", y1, "</span>","<br>",
            y2, "</span>","<br>", y3, "</span>","<br>", y4, "</span>","<br>", "</span>","<br>", exp1, "</span>","<br>", lc1x,
@@ -375,16 +375,59 @@ server<-function(input, output, session){
   })
 
 
+pType <- reactive({
+  input$plotType
+})
+
+compNum <- reactive({
+  input$component
+})
+
   output$Plot3.1 <- renderPlot({
 
+    pType <- pType()
+    compNum <- compNum()
 
-    p <- ggplot(obsScores, aes(x=x, y=y))+
-      geom_point()+
-      theme_classic()+
-      xlab("Demographics")+
-      ylab("Severity")
+    varlabels <- c("Male", "Asian", "Black", "MultiRace", "NativePI", "White", "Ethnicity",
+                   "Symptomatic", "Hospital", "ICU", "Death")
 
-    p
+    rotateS21::canCorrPlot(demographics, severity, pair=compNum, plotType=pType, labels=varlabels)+
+      ggplot2::scale_color_manual(
+        name="Variable Type",
+        values=c("blue","green"),
+        labels=c("Demographics", "Severity"))+
+      ggplot2::xlab("Demographic Component")+
+      ggplot2::ylab("Severity Component")
+
+
+    # obsScores <- data.frame("x"=ccaList[["scores"]][["xscores"]][,compNum],
+    #                         "y"=ccaList[["scores"]][["yscores"]][,compNum])
+    # demVarScores <- data.frame("Demographics"=ccaList[["scores"]][["corr.X.xscores"]][,compNum],
+    #                            "Severity"=ccaList[["scores"]][["corr.X.yscores"]][,compNum],
+    #                            "Type"="Dem")
+    # sevVarScores <- data.frame("Demographics"=ccaList[["scores"]][["corr.Y.xscores"]][,compNum],
+    #                            "Severity"=ccaList[["scores"]][["corr.Y.yscores"]][,compNum],
+    #                            "Type"="Sev")
+    # varScores <- dplyr::full_join(demVarScores,sevVarScores)
+    #
+    #
+    # if(pType=="obs"){
+    # p <- ggplot2::ggplot(obsScores, ggplot2::aes(x=x, y=y))+
+    #   ggplot2::geom_point()+
+    #   ggplot2::theme_classic()+
+    #   ggplot2::xlab("Demographics")+
+    #   ggplot2::ylab("Severity")
+    #
+    # p}
+    #
+    # if(pType=="bi"){
+    #   p <- ggplot2::ggplot(varScores, ggplot2::aes(x=x, y=y, color=~Type))+
+    #     ggplot2::geom_point()+
+    #     ggplot2::theme_classic()+
+    #     ggplot2::xlab("Demographics")+
+    #     ggplot2::ylab("Severity")
+    #
+    #   p}
 
       # blank<-data.frame("1"=c(1:10), "2"=c(1:10))
       # ggplot(data=blank, aes(x=1, y=2))+

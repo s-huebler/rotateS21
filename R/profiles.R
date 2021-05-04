@@ -33,11 +33,6 @@ profiles <- function(df, x1, y1, y2, y3){
   )
 
 
-  print(head(data))
-  print(proportionDF)
-
-
-
   p <- ggplot2::ggplot(proportionDF)+
     ggplot2::geom_point(ggplot2::aes(x=x1, y=prop1, color="1"))+
     ggplot2::geom_path(ggplot2::aes(x=x1, y=prop1, group="all", color="1"))+
